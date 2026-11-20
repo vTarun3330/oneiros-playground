@@ -6,769 +6,638 @@
 <title>Oneiros Playground</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: hero with pickers, guided walkthrough as the main view, collapsible full view, results, method. Colour = meaning: green correct program, red faulty program, orange voters/consensus (deck orange). */
+/* Layout: slim top bar with three views (Explore, Try your code, Results). Explore = picker bar, stage rail, one stage canvas. Colour = meaning: green correct program, red faulty program, orange voters/consensus, blue the input. */
 :root {
-  --bg: #F6F7F9; --surface: #FFFFFF; --card-a: #FFFFFF; --card-b: #FAFBFC; --sunk: #EEF1F4; --ink: #17202B; --muted: #4C5664; --dim: #6A7381;
-  --line: #DDE2E7; --border: #CDD3DA; --accent: #D46A0C; --accent-soft: #FDEBD8; --accent-ink: #8C4404; --cool: #2E5C8A;
-  --sel: #FDEBD8; --sel-line: #D46A0C; --shadow: 0 10px 30px rgba(23, 32, 43, .07);
-  --good: #1F7A4D; --good-soft: #DDF1E5; --bad: #BF3A2B; --bad-soft: #FBE4E0; --warn: #956000; --warn-soft: #FBEFD5;
-  --neutral-soft: #EBEEF1; --code-bg: #F3F5F8;
-  --font-display: Manrope, Inter, system-ui, sans-serif; --font-body: Inter, system-ui, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --bg: #F5F6F8; --surface: #FFFFFF; --sunk: #EEF1F4; --ink: #151C26; --muted: #4F5966; --dim: #737C89; --line: #DFE3E8; --border: #CBD2D9;
+  --accent: #D46A0C; --accent-soft: #FDEBD8; --accent-ink: #8C4404; --input: #2E5C8A; --input-soft: #E3EDF7;
+  --good: #1D7A4B; --good-soft: #DCF1E4; --bad: #BE3A2B; --bad-soft: #FBE3DF; --warn: #946000; --warn-soft: #FAEFD4; --neutral-soft: #EAEDF0;
+  --code-bg: #F4F6F8; --shadow: 0 1px 2px rgba(21, 28, 38, .05), 0 10px 28px rgba(21, 28, 38, .06);
+  --font-display: Manrope, Inter, system-ui, sans-serif; --font-body: Inter, system-ui, "Segoe UI", sans-serif; --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #12161C; --surface: #1A1F27; --card-a: #1D232C; --card-b: #1A1F27; --sunk: #151A21; --ink: #E8EBEF; --muted: #AAB2BE; --dim: #8C95A3;
-  --line: #2C333E; --border: #3A4250; --accent: #F0913A; --accent-soft: #3A2716; --accent-ink: #F8C590; --cool: #82AAD6;
-  --sel: #3A2716; --sel-line: #F0913A; --shadow: 0 12px 34px rgba(0, 0, 0, .35);
-  --good: #6FD39C; --good-soft: #183326; --bad: #F28B7E; --bad-soft: #3B1F1C; --warn: #E8B85C; --warn-soft: #352B1A;
-  --neutral-soft: #242B35; --code-bg: #151A21; color-scheme: dark; } }
+  --bg: #111419; --surface: #191E25; --sunk: #14181E; --ink: #E8EBEF; --muted: #AAB2BD; --dim: #8D96A2; --line: #2A313B; --border: #39414D;
+  --accent: #F0913A; --accent-soft: #3A2716; --accent-ink: #F8C590; --input: #8DB4E2; --input-soft: #1C2A3A;
+  --good: #6FD39C; --good-soft: #173225; --bad: #F28B7E; --bad-soft: #3A1E1B; --warn: #E8B85C; --warn-soft: #33291A; --neutral-soft: #232A33;
+  --code-bg: #14181E; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.3); color-scheme: dark; } }
 :root[data-theme="dark"] {
-  --bg: #12161C; --surface: #1A1F27; --card-a: #1D232C; --card-b: #1A1F27; --sunk: #151A21; --ink: #E8EBEF; --muted: #AAB2BE; --dim: #8C95A3;
-  --line: #2C333E; --border: #3A4250; --accent: #F0913A; --accent-soft: #3A2716; --accent-ink: #F8C590; --cool: #82AAD6;
-  --sel: #3A2716; --sel-line: #F0913A; --shadow: 0 12px 34px rgba(0, 0, 0, .35);
-  --good: #6FD39C; --good-soft: #183326; --bad: #F28B7E; --bad-soft: #3B1F1C; --warn: #E8B85C; --warn-soft: #352B1A;
-  --neutral-soft: #242B35; --code-bg: #151A21; color-scheme: dark; }
+  --bg: #111419; --surface: #191E25; --sunk: #14181E; --ink: #E8EBEF; --muted: #AAB2BD; --dim: #8D96A2; --line: #2A313B; --border: #39414D;
+  --accent: #F0913A; --accent-soft: #3A2716; --accent-ink: #F8C590; --input: #8DB4E2; --input-soft: #1C2A3A;
+  --good: #6FD39C; --good-soft: #173225; --bad: #F28B7E; --bad-soft: #3A1E1B; --warn: #E8B85C; --warn-soft: #33291A; --neutral-soft: #232A33;
+  --code-bg: #14181E; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.3); color-scheme: dark; }
 * { box-sizing: border-box; }
 html { background: var(--bg); }
-body { min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
-h1, h2, h3, .brand { font-family: var(--font-display); }
-em.gold { font-style: normal; color: var(--accent); }
+body { min-height: 100vh; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font-body); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
-.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-nav.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line); }
-nav.top .wrap { display: flex; align-items: center; gap: 20px; padding-block: 10px; flex-wrap: wrap; }
-.brand { font-weight: 700; letter-spacing: .02em; }
-.brand span { color: var(--accent); }
-nav.top a { color: var(--muted); text-decoration: none; font-size: 14px; }
-nav.top a:hover { color: var(--ink); }
-nav.top .spacer { flex: 1; }
-h1, h2, h3 { text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 700; letter-spacing: -.01em; }
-h2 { font-size: 22px; font-weight: 650; }
-h3 { font-size: 15px; font-weight: 600; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.02em; }
 p { margin: 0; }
-.lead { color: var(--muted); max-width: 68ch; margin-top: 8px; }
-header.hero { padding-block: 28px 18px; }
-.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); }
-.pickers { display: grid; grid-template-columns: auto 1fr auto; gap: 14px 18px; align-items: end; margin-top: 20px; padding: 16px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-.field { display: grid; gap: 6px; min-width: 0; }
-.field label, .lbl { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: .03em; text-transform: uppercase; }
-select { font: inherit; padding: 8px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); width: 100%; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
-.seg button { font: inherit; font-size: 14px; border: 0; background: var(--surface); color: var(--ink); padding: 7px 12px; cursor: pointer; border-right: 1px solid var(--line); }
-.seg button:last-child { border-right: 0; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
-button:focus-visible, select:focus-visible, .step:focus-visible, .voter:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn { font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--accent); background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-.btn.ghost { background: transparent; color: var(--accent-ink); }
-.btn:disabled { opacity: .5; cursor: default; }
-.strip { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 8px; margin-top: 14px; align-items: stretch; }
-.step { text-align: left; font: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; cursor: pointer; color: var(--ink); min-width: 0; }
-.step b { display: block; font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-weight: 500; }
-.step span { font-size: 14px; font-weight: 600; }
-.step.on { border-color: var(--accent); background: var(--accent-soft); }
-.step.on b { color: var(--accent-ink); }
-.strip .controls { display: flex; gap: 8px; align-items: center; }
-section.scene { margin-top: 26px; padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; scroll-margin-top: 80px; }
-section.scene.focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.scene-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 14px; }
-.scene-head p { color: var(--muted); font-size: 14px; max-width: 70ch; }
-.num { font-family: var(--font-mono); color: var(--accent-ink); font-size: 13px; margin-right: 8px; }
-.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 18px; }
-.card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; background: var(--surface); }
-.spec { white-space: pre-wrap; font-size: 14px; color: var(--ink); max-height: 300px; overflow: auto; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--neutral-soft); color: var(--muted); }
-.tag.accent { background: var(--accent-soft); color: var(--accent-ink); }
-pre.code { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.55; background: var(--code-bg); border: 1px solid var(--line);
-  border-radius: 8px; padding: 10px 0; overflow-x: auto; max-height: 360px; }
-pre.code .ln { display: block; padding: 0 12px; white-space: pre; }
-pre.code .ln.add { background: var(--bad-soft); }
-pre.code .ln.del { background: var(--good-soft); }
-pre.code .ln.add::before { content: "faulty  "; color: var(--bad); }
-pre.code .ln.del::before { content: "correct "; color: var(--good); }
-.tabs { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
-.tabs button { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; }
-.tabs button[aria-selected="true"] { color: var(--ink); border-color: var(--ink); }
-.hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
-/* tests */
-.tests { display: grid; gap: 6px; }
-.trow { display: grid; grid-template-columns: 34px minmax(0, 1fr) 92px 92px 190px; gap: 8px; align-items: center; padding: 7px 10px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--surface); transition: opacity .35s ease, transform .35s ease; }
-.trow.head { background: transparent; border: 0; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; padding-block: 0; }
-.trow.hidden { opacity: 0; transform: translateY(6px); }
-.trow .rk { font-family: var(--font-mono); color: var(--muted); font-size: 13px; }
-.trow code { font-family: var(--font-mono); font-size: 13px; overflow-x: auto; white-space: nowrap; display: block; }
-.trow .none { color: var(--muted); font-style: italic; font-size: 13px; }
-.st { font-family: var(--font-mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 6px; text-align: center; background: var(--neutral-soft); color: var(--muted); transition: background .3s, color .3s; }
-.st small { display: block; font-weight: 400; font-size: 11px; opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.st.pass { background: var(--good-soft); color: var(--good); }
-.st.fail { background: var(--bad-soft); color: var(--bad); }
-.st.err { background: var(--warn-soft); color: var(--warn); }
-.st.run { background: var(--accent-soft); color: var(--accent-ink); animation: pulse .7s ease-in-out infinite alternate; }
-@keyframes pulse { from { opacity: .55; } to { opacity: 1; } }
-.pill { font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 999px; text-align: center; background: var(--neutral-soft); color: var(--muted); }
-.pill.good { background: var(--good-soft); color: var(--good); }
-.pill.bad { background: var(--bad-soft); color: var(--bad); }
-.pill.warn { background: var(--warn-soft); color: var(--warn); }
-.scoreline { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-.score { padding: 8px 12px; border-radius: 8px; background: var(--sunk); font-size: 14px; }
-.score b { font-family: var(--font-mono); }
-/* voters */
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.chip { font-family: var(--font-mono); font-size: 12.5px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 10px; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
-.voters { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
-.voter { font: inherit; text-align: center; border: 1px solid var(--line); border-radius: 10px; padding: 10px 6px; background: var(--surface); color: var(--ink); cursor: pointer; transition: transform .25s ease, border-color .25s, background .25s; min-width: 0; }
-.voter .vn { font-size: 12px; color: var(--muted); }
-.voter .vo { font-family: var(--font-mono); font-size: 14px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.voter.wait .vo { color: var(--muted); }
-.voter.maj { border-color: var(--accent); background: var(--accent-soft); }
-.voter.pop { transform: translateY(-3px); }
-.tally { margin-top: 14px; display: grid; gap: 8px; }
-.bar { display: flex; height: 26px; border-radius: 7px; overflow: hidden; background: var(--sunk); }
-.bar div { display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 12px; color: #fff; white-space: nowrap; overflow: hidden; transition: width .5s ease; }
-.verdict { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
-.verdict .card { padding: 10px 12px; }
-.verdict .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
-.verdict .v { font-family: var(--font-mono); font-size: 15px; margin-top: 3px; overflow-wrap: anywhere; }
-.drawer { margin-top: 12px; }
-.compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
-.compare .trow { grid-template-columns: 30px minmax(0, 1fr) 176px; }
-.compare .pill { white-space: nowrap; font-size: 11.5px; }
-/* results */
-.chart { width: 100%; overflow-x: auto; }
-.chart svg { display: block; min-width: 560px; width: 100%; height: auto; }
-.legend { display: flex; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
-.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
-.method { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.method p { font-size: 14px; color: var(--muted); margin-top: 6px; }
-dl.terms { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; margin: 14px 0 0; }
-dl.terms dt { font-weight: 600; }
-dl.terms dd { margin: 0; color: var(--muted); }
-footer { padding-block: 26px 40px; color: var(--muted); font-size: 13px; }
-.next { margin-top: 26px; border: 1px dashed var(--line); border-radius: 12px; padding: 18px 22px; color: var(--muted); }
-/* guided walkthrough */
-.guide { margin-top: 18px; display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 0; background: var(--surface);
-  border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.narr { padding: 20px; border-right: 1px solid var(--line); background: var(--sunk); display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.narr .stage-n { font-family: var(--font-mono); font-size: 12px; color: var(--accent-ink); letter-spacing: .06em; text-transform: uppercase; }
-.narr h2 { font-size: 21px; }
-.narr p { color: var(--ink); font-size: 14.5px; }
-.narr .why { color: var(--muted); font-size: 13.5px; border-left: 3px solid var(--accent); padding-left: 10px; }
-.dots { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
-.dots button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted);
-  font: 500 11px var(--font-mono); cursor: pointer; padding: 0; }
-.dots button.done { background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
-.dots button.cur { background: var(--accent); color: #fff; border-color: var(--accent); }
-.navbtns { display: flex; gap: 8px; flex-wrap: wrap; }
-.stage { padding: 22px; min-height: 430px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
-.stage .row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
-.lock { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
-.lockbox { border: 1px dashed var(--line); border-radius: 10px; padding: 14px; color: var(--muted); font-size: 14px; display: grid; place-items: center; text-align: center; min-height: 120px; }
-.typed { font-family: var(--font-mono); font-size: 13.5px; display: grid; gap: 6px; }
-.typed div { padding: 6px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--code-bg); white-space: pre; overflow-x: auto; }
-.typed div.focus { border-color: var(--accent); background: var(--accent-soft); }
-.anatomy { display: grid; grid-template-columns: auto auto auto; gap: 10px; align-items: stretch; justify-content: start; font-family: var(--font-mono); }
-.anatomy .part { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; background: var(--code-bg); min-width: 0; overflow-wrap: anywhere; }
-.anatomy .part small { display: block; font-family: var(--font-body); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
-.anatomy .op { align-self: center; font-size: 20px; color: var(--muted); }
-.trace { display: grid; gap: 10px; }
-.tstep { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; opacity: 1; transition: opacity .35s, transform .35s; }
-.tstep.hidden { opacity: 0; transform: translateX(-8px); }
-.tstep .ix { width: 28px; height: 28px; border-radius: 50%; background: var(--neutral-soft); display: grid; place-items: center; font: 600 12px var(--font-mono); color: var(--muted); }
-.tstep .box { border: 1px solid var(--line); border-radius: 9px; padding: 9px 12px; font-family: var(--font-mono); font-size: 13.5px; overflow-x: auto; background: var(--surface); }
-.tstep .box em { font-style: normal; color: var(--muted); font-family: var(--font-body); font-size: 12.5px; display: block; margin-bottom: 2px; }
-.prog { border-radius: 10px; padding: 12px; border: 1px solid var(--line); min-width: 0; }
-.prog h3 { margin-bottom: 8px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-.bigverdict { border-radius: 10px; padding: 14px 16px; font-size: 15px; }
-.bigverdict.good { background: var(--good-soft); color: var(--good); }
-.bigverdict.bad { background: var(--bad-soft); color: var(--bad); }
-.bigverdict.neutral { background: var(--neutral-soft); color: var(--ink); }
-.bigverdict b { display: block; font-size: 17px; margin-bottom: 3px; }
-.grid8 { display: grid; gap: 6px; }
-.g8 { display: grid; grid-template-columns: 30px minmax(0, 1fr) 70px 70px 180px; gap: 8px; align-items: center; font-size: 13px; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--line); }
-.g8 code { font-family: var(--font-mono); white-space: nowrap; overflow-x: auto; display: block; }
-.minicode { font-family: var(--font-mono); font-size: 11px; white-space: pre; overflow: hidden; max-height: 92px; color: var(--muted); background: var(--code-bg); border-radius: 6px; padding: 6px; margin-top: 6px; text-align: left; }
-.voters.tall .voter { padding-bottom: 8px; }
+code, .mono { font-family: var(--font-mono); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 18px; padding-block: 10px; flex-wrap: wrap; }
+.brand { font: 800 19px var(--font-display); letter-spacing: -.03em; }
+.brand i { font-style: normal; color: var(--accent); }
+.views { display: flex; gap: 2px; background: var(--sunk); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+.views button { font: 600 13.5px var(--font-body); border: 0; background: transparent; color: var(--muted); padding: 6px 14px; border-radius: 7px; cursor: pointer; }
+.views button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.top .note { margin-left: auto; font: 500 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.hero { padding-block: 34px 18px; display: grid; gap: 10px; }
+.hero h1 { font-size: clamp(30px, 4.4vw, 50px); font-weight: 800; letter-spacing: -.04em; line-height: 1.05; }
+.hero h1 b { color: var(--accent); font-weight: 800; }
+.hero p { color: var(--muted); font-size: 16px; max-width: 62ch; }
+.bar { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); }
+.bar .grow { flex: 1 1 280px; min-width: 0; }
+.lab { font: 500 10.5px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); display: block; margin-bottom: 4px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--sunk); border: 1px solid var(--line); border-radius: 9px; padding: 3px; }
+.seg button { font: 500 13px var(--font-body); border: 0; background: transparent; color: var(--muted); padding: 5px 11px; border-radius: 6px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+select, textarea { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+select { width: 100%; padding: 7px 10px; min-height: 38px; }
+.btn { font: 600 13.5px var(--font-body); border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 8px; padding: 7px 14px; cursor: pointer; min-height: 36px; display: inline-flex; gap: 6px; align-items: center; }
+.btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn:hover:not(:disabled) { filter: brightness(1.05); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 16px; }
+.rail button { font: inherit; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 10px; cursor: pointer; color: var(--muted); min-width: 0; }
+.rail button b { display: block; font: 600 11px var(--font-mono); color: var(--dim); }
+.rail button span { font: 600 13px var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.rail button.done { color: var(--ink); }
+.rail button.done b { color: var(--accent-ink); }
+.rail button.cur { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.stage { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+.stage-head { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.stage-head h2 { font-size: 19px; }
+.stage-head p { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+.nav { display: flex; gap: 6px; }
+.canvas { padding: 20px 18px 22px; min-height: 420px; display: grid; gap: 16px; align-content: start; }
+.card { border: 1px solid var(--line); border-radius: 11px; padding: 14px; background: var(--surface); min-width: 0; }
+.card h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.three { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, .8fr); gap: 14px; }
+pre.code { margin: 0; font: 13px/1.6 var(--font-mono); background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow: auto; max-height: 300px; white-space: pre; }
+.spec { font-size: 15px; line-height: 1.55; white-space: pre-wrap; max-height: 300px; overflow: auto; }
+.locked { display: grid; place-items: center; gap: 8px; text-align: center; color: var(--dim); border: 1.5px dashed var(--border); border-radius: 11px; padding: 18px; font-size: 13px; background: repeating-linear-gradient(135deg, transparent 0 10px, var(--sunk) 10px 11px); }
+.locked svg { width: 30px; height: 30px; color: var(--dim); }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+.dot.good { background: var(--good); } .dot.bad { background: var(--bad); } .dot.acc { background: var(--accent); } .dot.inp { background: var(--input); }
+.tag { font: 500 11px var(--font-mono); padding: 2px 8px; border-radius: 999px; background: var(--neutral-soft); color: var(--muted); }
+.deck { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.tcard { font: inherit; text-align: left; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); padding: 10px 12px; cursor: pointer; min-width: 0; color: var(--ink); transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s, border-color .2s; }
+.tcard.out { opacity: 0; transform: translateY(14px) scale(.97); }
+.tcard:hover { border-color: var(--accent); }
+.tcard .n { font: 600 11px var(--font-mono); color: var(--dim); }
+.tcard .c { font: 13px var(--font-mono); margin-top: 6px; display: grid; gap: 4px; }
+.tcard .c span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.part-in { color: var(--input); } .part-ex { color: var(--accent-ink); } .part-op { color: var(--dim); }
+.runner { display: grid; gap: 14px; }
+.callbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font: 14px var(--font-mono); }
+.pillv { padding: 6px 11px; border-radius: 8px; max-width: 100%; overflow-wrap: anywhere; }
+.pillv.inp { background: var(--input-soft); color: var(--input); }
+.pillv.exp { background: var(--accent-soft); color: var(--accent-ink); }
+.lane { display: grid; grid-template-columns: minmax(0, 1fr) 34px minmax(0, .9fr) 34px minmax(0, .9fr) 34px minmax(0, 1.1fr) 104px; align-items: center; }
+.node { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: var(--surface); min-width: 0; transition: opacity .35s, transform .35s, border-color .3s, box-shadow .3s; }
+.node small { display: block; font: 500 10px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-bottom: 2px; }
+.node .v { font: 13.5px var(--font-mono); overflow-wrap: anywhere; }
+.node.prog.good { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); }
+.node.prog.bad { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.node.prog .v { font: 700 13.5px var(--font-display); display: flex; gap: 7px; align-items: center; }
+.node.run { box-shadow: 0 0 0 4px var(--accent-soft); border-color: var(--accent); }
+.node.run .v::after { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); border-right-color: transparent; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pend { opacity: .18; transform: translateX(-6px); }
+.link { height: 2px; background: var(--line); position: relative; margin: 0 4px; }
+.link::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); transition: width .35s ease; }
+.link.on::after { width: 100%; }
+.verdict { justify-self: end; font: 700 13px var(--font-display); padding: 7px 10px; border-radius: 9px; transition: transform .3s cubic-bezier(.3,1.6,.5,1), opacity .25s; white-space: nowrap; }
+.verdict.pend { transform: scale(.6); }
+.verdict.pass { background: var(--good-soft); color: var(--good); } .verdict.fail { background: var(--bad-soft); color: var(--bad); } .verdict.skip { background: var(--neutral-soft); color: var(--dim); }
+.banner { border-radius: 11px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; transition: opacity .35s, transform .35s; }
+.banner.pend { opacity: 0; transform: translateY(6px); }
+.banner .ico { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 800 15px var(--font-display); flex: none; color: #fff; }
+.banner.good { background: var(--good-soft); } .banner.good .ico { background: var(--good); }
+.banner.bad { background: var(--bad-soft); } .banner.bad .ico { background: var(--bad); }
+.banner.neutral { background: var(--neutral-soft); } .banner.neutral .ico { background: var(--dim); }
+.banner b { font-family: var(--font-display); display: block; }
+.banner span { color: var(--muted); font-size: 13.5px; }
+.testtabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.testtabs button { font: 600 12px var(--font-mono); border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 8px; padding: 5px 9px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.testtabs button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
+.matrix { display: grid; gap: 6px; }
+.mrow { display: grid; grid-template-columns: 32px minmax(0, 1fr) 70px 70px 190px; gap: 10px; align-items: center; padding: 7px 10px; border: 1px solid var(--line); border-radius: 9px; transition: opacity .3s, transform .3s; }
+.mrow.head { border: 0; padding-block: 0; font: 500 10.5px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.mrow.pend { opacity: 0; transform: translateY(5px); }
+.mrow code { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.mark { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font: 800 13px var(--font-display); }
+.mark.p { background: var(--good-soft); color: var(--good); } .mark.f { background: var(--bad-soft); color: var(--bad); } .mark.e { background: var(--warn-soft); color: var(--warn); } .mark.s { background: var(--neutral-soft); color: var(--dim); }
+.vtag { font: 600 12px var(--font-body); padding: 4px 9px; border-radius: 999px; justify-self: start; white-space: nowrap; }
+.vtag.good { background: var(--good-soft); color: var(--good); } .vtag.bad { background: var(--bad-soft); color: var(--bad); } .vtag.warn { background: var(--warn-soft); color: var(--warn); } .vtag.n { background: var(--neutral-soft); color: var(--muted); }
+.kpis { display: flex; flex-wrap: wrap; gap: 10px; }
+.kpi { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; display: flex; gap: 8px; align-items: center; font-size: 13.5px; }
+.kpi b { font: 700 15px var(--font-display); }
+.kpi .lab { margin: 0; }
+.vgrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; perspective: 900px; }
+.vtile { position: relative; height: 84px; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3,.7,.3,1); cursor: pointer; border: 0; background: none; padding: 0; font: inherit; color: inherit; }
+.vtile.flip { transform: rotateY(180deg); }
+.vtile .face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px; border: 1px solid var(--line); display: grid; place-items: center; align-content: center; gap: 4px; text-align: center; padding: 6px; background: var(--surface); }
+.vtile .face.front { background: var(--sunk); }
+.vtile .face.front svg { width: 22px; height: 22px; color: var(--dim); }
+.vtile .face.back { transform: rotateY(180deg); }
+.vtile .face small { font: 500 10px var(--font-mono); color: var(--dim); letter-spacing: .06em; }
+.vtile .face .o { font: 600 14px var(--font-mono); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vtile.maj .face.back { border-color: var(--accent); background: var(--accent-soft); }
+.vtile.maj .face.back .o { color: var(--accent-ink); }
+.tally { display: flex; height: 30px; border-radius: 9px; overflow: hidden; background: var(--sunk); }
+.tally div { display: flex; align-items: center; justify-content: center; font: 600 12px var(--font-mono); color: #fff; white-space: nowrap; overflow: hidden; width: 0; transition: width .6s ease; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { font: 12.5px var(--font-mono); border: 1px solid var(--line); background: var(--surface); color: var(--input); border-radius: 999px; padding: 4px 10px; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chips button[aria-pressed="true"] { background: var(--input-soft); border-color: var(--input); }
+.drawer { border: 1px solid var(--line); border-radius: 11px; padding: 12px; }
+.drawer[hidden] { display: none !important; }
+.cmp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.big { display: flex; gap: 16px; flex-wrap: wrap; }
+.bignum { border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; min-width: 160px; }
+.bignum small { font: 500 10.5px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.bignum div { font: 800 26px var(--font-display); letter-spacing: -.02em; display: flex; gap: 10px; align-items: center; }
+.yes { color: var(--good); } .no { color: var(--bad); }
+.tryg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+textarea { width: 100%; font: 13px/1.6 var(--font-mono); padding: 10px 12px; background: var(--code-bg); resize: vertical; tab-size: 4; }
+.mutlist { display: grid; gap: 6px; max-height: 280px; overflow: auto; }
+.mut { font: inherit; text-align: left; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.mut[aria-pressed="true"] { border-color: var(--bad); background: var(--bad-soft); }
+.mut code { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.kill { display: grid; gap: 8px; overflow-x: auto; }
+.kill table { border-collapse: collapse; font: 12px var(--font-mono); }
+.kill th, .kill td { border: 1px solid var(--line); padding: 4px 7px; text-align: center; white-space: nowrap; }
+.kill th { color: var(--dim); font-weight: 500; }
+.kill td.k { background: var(--good-soft); color: var(--good); font-weight: 700; }
+.kill td.s { color: var(--dim); }
+.chart svg { display: block; width: 100%; height: auto; min-width: 560px; }
+.chart { overflow-x: auto; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stat { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); }
+.stat b { font: 800 30px var(--font-display); letter-spacing: -.03em; color: var(--accent-ink); display: block; }
+.stat span { color: var(--muted); font-size: 13.5px; }
+footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
+[data-view][hidden] { display: none !important; }
 @media (max-width: 900px) {
-  .guide { grid-template-columns: minmax(0, 1fr); }
-  .narr { border-right: 0; border-bottom: 1px solid var(--line); }
-  .stage .row2 { grid-template-columns: minmax(0, 1fr); }
-  .g8 { grid-template-columns: 26px minmax(0, 1fr) 60px 60px; }
-  .g8 .catcell { grid-column: 2 / -1; }
-  .anatomy { grid-template-columns: minmax(0, 1fr); }
-  .anatomy .op { display: none; }
+  .rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .three, .cmp, .tryg, .stats { grid-template-columns: minmax(0, 1fr); }
+  .deck { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lane { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .lane .link { width: 2px; height: 14px; margin: 0 0 0 18px; }
+  .lane .link::after { width: 100%; height: 0; transition: height .35s; }
+  .lane .link.on::after { height: 100%; }
+  .verdict { justify-self: start; }
+  .mrow { grid-template-columns: 26px minmax(0, 1fr) 34px 34px; }
+  .mrow .vtag { grid-column: 2 / -1; }
+  .mrow.head span:last-child { display: none; }
 }
-@media (max-width: 900px) {
-  .pickers { grid-template-columns: 1fr; }
-  .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .strip .controls { grid-column: 1 / -1; }
-  .cols, .compare, .method, .verdict { grid-template-columns: minmax(0, 1fr); }
-  .voters { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .trow { grid-template-columns: 26px minmax(0, 1fr) 70px 70px; }
-  .trow .catcell { grid-column: 2 / -1; justify-self: start; }
-  .trow.head .catcell { display: none; }
-}
-/* ---- Oneiros look (after base rules so it wins) ---- */
-nav.top { background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-body::before { background: var(--surface); }
-.brand { font-weight: 800; letter-spacing: -.02em; font-size: 18px; }
-.brand span { color: var(--accent); }
-nav.top a { color: var(--muted); font-size: 13.5px; font-weight: 500; }
-nav.top a:hover { color: var(--accent-ink); }
-.wrap { max-width: 1200px; }
-header.hero { padding-block: 40px 8px; }
-h1 { font-size: clamp(32px, 4.6vw, 54px); font-weight: 800; letter-spacing: -.035em; line-height: 1.05; }
-h2 { font-size: clamp(19px, 1.8vw, 23px); font-weight: 700; letter-spacing: -.015em; }
-.lead { color: var(--muted); font-size: 16px; margin-top: 12px; }
-.eyebrow, .lbl, .field label, .stage-n, .num, .tag, .k { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; }
-.eyebrow { color: var(--accent-ink); }
-.pickers { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); margin-top: 24px; padding: 18px; }
-.seg { background: var(--sunk); border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 3px; }
-.seg button { background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--muted); padding: 6px 12px; font-size: 13.5px; font-weight: 500; }
-.seg button:hover { color: var(--ink); }
-.seg button[aria-pressed="true"] { background: var(--surface); border-color: var(--border); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-height: 40px; color: var(--ink); }
-.btn { background: var(--accent); border-color: var(--accent); color: #FFFFFF; border-radius: 8px; min-height: 38px; }
-.btn:hover:not(:disabled) { filter: brightness(1.06); }
-.btn.ghost { background: var(--surface); border: 1px solid var(--border); color: var(--ink); }
-.btn.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-ink); }
-button:focus-visible, select:focus-visible, .step:focus-visible, .voter:focus-visible, .chip:focus-visible, .dots button:focus-visible { outline: 2px solid var(--accent); }
-.guide { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
-.narr { background: var(--sunk); border-right: 1px solid var(--line); }
-.narr h2 { font-size: clamp(20px, 2vw, 25px); }
-.narr .why { border-left-color: var(--accent); color: var(--muted); }
-.dots button { background: var(--surface); border-color: var(--line); color: var(--dim); }
-.dots button.done { background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
-.dots button.cur { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
-.card, .prog, .lockbox, .anatomy .part, .typed div, .g8, .trow, .voter, .chip, .tstep .box { background: var(--surface); border-color: var(--line); }
-.card { border-radius: 10px; }
-.typed div.focus, .voter.maj, .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
-.prog:first-child h3 { color: var(--good); }
-pre.code { background: var(--code-bg); border-color: var(--line); }
-.tag { background: var(--neutral-soft); color: var(--muted); font-size: 10.5px; }
-.tag.accent { background: var(--accent-soft); color: var(--accent-ink); }
-.st { background: var(--neutral-soft); color: var(--dim); }
-.pill { background: var(--neutral-soft); color: var(--muted); font-weight: 600; }
-.bar div { color: #FFFFFF; font-weight: 600; }
-.score { background: var(--sunk); border: 1px solid var(--line); }
-.bigverdict.neutral { background: var(--accent-soft); color: var(--ink); }
-.step { background: var(--surface); border-color: var(--line); color: var(--muted); }
-.step b { color: var(--dim); }
-.step.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
-.step.on b { color: var(--accent-ink); }
-section.scene { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 32px 0 6px; margin-top: 18px; }
-section.scene.focus { box-shadow: none; }
-section.scene.focus .scene-head h2 { color: var(--accent-ink); }
-details.full { margin-top: 38px; border-top: 1px solid var(--line); padding-top: 22px; }
-details.full > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-details.full > summary::-webkit-details-marker { display: none; }
-details.full > summary h2::after { content: " +"; color: var(--accent); }
-details.full[open] > summary h2::after { content: " −"; }
-.next { border-color: var(--border); color: var(--muted); background: var(--surface); }
-footer { color: var(--dim); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
-<nav class="top"><div class="wrap">
-  <div class="brand">Oneiros<span>.</span></div>
-  <a href="#guide">Walkthrough</a><a href="#full">All stages</a><a href="#results">Results</a><a href="#method">How it works</a>
-  <div class="spacer"></div>
-  <span class="tag accent">recorded runs</span>
-</div></nav>
+<header class="top"><div class="wrap">
+  <div class="brand">Oneiros<i>.</i></div>
+  <div class="views" role="tablist" aria-label="Views">
+    <button role="tab" data-go="explore" aria-selected="true">Explore</button>
+    <button role="tab" data-go="try" aria-selected="false">Try your code</button>
+    <button role="tab" data-go="results" aria-selected="false">Results</button>
+  </div>
+  <span class="note">recorded runs · live sandbox</span>
+</div></header>
 
 <main class="wrap">
-  <header class="hero">
-    <div class="eyebrow">Research demo · test generation</div>
-    <h1>Oneiros <em class="gold">playground</em></h1>
-    <p class="lead">Pick a buggy function and a tester model. Follow a 1.5B model as it writes tests, watch each test run on the correct and the faulty program, and see how voters written from the specification fix the expected values.</p>
-    <div class="pickers">
-      <div class="field"><span class="lbl">Dataset</span><div class="seg" id="dsSeg" role="group" aria-label="Dataset"></div></div>
-      <div class="field"><label for="probSel">Problem</label><select id="probSel"></select></div>
-      <div class="field"><span class="lbl">Tester model</span><div class="seg" id="testerSeg" role="group" aria-label="Tester model"></div></div>
-    </div>
-  </header>
+  <section class="hero">
+    <div class="lab eyebrow">Research demo · test generation</div>
+    <h1>Watch a small model <b>test</b> buggy code</h1>
+    <p>A 1.5B model writes tests. Every test runs on the correct and the faulty program. Voters written from the specification fix the expected values.</p>
+  </section>
 
-  <section id="guide" aria-label="Guided walkthrough">
-    <div class="scene-head" style="margin:6px 0 0"><h2>Step-by-step walkthrough</h2>
-      <p>Follow one problem from input to verdict. Use Next, the numbered stages, or the arrow keys.</p></div>
-    <div class="guide">
-      <div class="narr">
-        <div class="stage-n" id="gNum"></div>
-        <h2 id="gTitle"></h2>
-        <p id="gText"></p>
-        <p class="why" id="gWhy"></p>
-        <div class="navbtns"><button class="btn ghost" id="gPrev">Back</button><button class="btn" id="gNext">Next</button><button class="btn ghost" id="gAuto">Autoplay</button></div>
-        <div class="dots" id="gDots"></div>
+  <section data-view="explore">
+    <div class="bar">
+      <div><span class="lab">Dataset</span><div class="seg" id="dsSeg"></div></div>
+      <div class="grow"><label class="lab" for="probSel">Problem</label><select id="probSel"></select></div>
+      <div><span class="lab">Tester</span><div class="seg" id="testerSeg"></div></div>
+    </div>
+    <nav class="rail" id="rail" aria-label="Stages"></nav>
+    <div class="stage">
+      <div class="stage-head">
+        <div><h2 id="sTitle"></h2><p id="sSub"></p></div>
+        <div class="nav"><button class="btn ghost" id="bPrev" aria-label="Previous stage">←</button><button class="btn ghost" id="bPlay">Play</button><button class="btn" id="bNext">Next →</button></div>
       </div>
-      <div class="stage" id="gStage" aria-live="polite"></div>
+      <div class="canvas" id="canvas" aria-live="polite"></div>
     </div>
   </section>
 
-  <details class="full" id="full">
-    <summary><h2>Every stage at once</h2><p class="lead" style="margin:0;font-size:14px">The whole pipeline for the selected problem on one page, with replayable animations.</p></summary>
-    <div class="strip" id="strip">
-      <button class="step" data-step="1"><b>01</b><span>The task</span></button>
-      <button class="step" data-step="2"><b>02</b><span>Tester writes 8 tests</span></button>
-      <button class="step" data-step="3"><b>03</b><span>Run on both programs</span></button>
-      <button class="step" data-step="4"><b>04</b><span>Voters decide the value</span></button>
-      <button class="step" data-step="5"><b>05</b><span>Consensus ranking</span></button>
-      <div class="controls"><button class="btn" id="playBtn">Run pipeline</button></div>
-    </div>
-
-  <section class="scene" id="scene-task" data-step="1">
-    <div class="scene-head"><h2><span class="num">01</span>The task</h2>
-      <p>The tester sees the specification and the faulty function. The correct function stays hidden and is used only to score tests.</p></div>
-    <div class="cols">
-      <div class="card"><h3>Specification</h3><p class="spec" id="spec"></p><div class="meta" id="meta"></div></div>
-      <div class="card">
-        <div class="tabs" role="tablist" id="codeTabs">
-          <button role="tab" data-v="faulty" aria-selected="true">Faulty (model sees)</button>
-          <button role="tab" data-v="correct" aria-selected="false">Correct (hidden)</button>
-          <button role="tab" data-v="diff" aria-selected="false">What changed</button>
+  <section data-view="try" hidden>
+    <div class="stage">
+      <div class="stage-head"><div><h2>Try your own code</h2><p>Write a function, generate bugs, write tests, and run them on both versions.</p></div>
+        <div class="status" id="pyStatus">Python sandbox not loaded</div></div>
+      <div class="canvas">
+        <div class="tryg">
+          <div class="card"><h3><span class="dot good"></span>Correct function</h3><textarea id="tCode" rows="9" spellcheck="false" aria-label="Correct function"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" id="tMut">Generate bugs</button></div></div>
+          <div class="card"><h3><span class="dot bad"></span>Faulty version <span class="tag" id="tMutInfo">pick a bug</span></h3>
+            <div class="mutlist" id="tMuts"><div class="status">Generate bugs to see mutated versions.</div></div></div>
         </div>
-        <pre class="code" id="code"></pre>
+        <div class="card"><h3><span class="dot acc"></span>Your tests <span class="tag">one assertion per line</span></h3>
+          <textarea id="tTests" rows="5" spellcheck="false" aria-label="Your tests"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="btn" id="tRun">Run on both programs</button><button class="btn ghost" id="tAll">Check against every bug</button></div></div>
+        <div id="tOut" class="runner"></div>
+        <div id="tKill" class="kill"></div>
       </div>
     </div>
   </section>
 
-  <section class="scene" id="scene-tests" data-step="2">
-    <div class="scene-head"><h2><span class="num">02</span>The tester writes eight tests</h2>
-      <p>Each test is one assertion: an input and the output the model expects from the correct program.</p>
-      <button class="btn ghost" data-replay="2">Replay</button></div>
-    <div class="tests" id="testsWrite"></div>
+  <section data-view="results" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="stage" style="margin-top:14px"><div class="stage-head"><div><h2>All 593 external problems</h2><p id="resNote"></p></div></div>
+      <div class="canvas" style="min-height:0"><div class="chart" id="chart"></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Kill@8</span><span><i style="background:var(--ink)"></i>Kill@1</span></div></div></div>
   </section>
 
-  <section class="scene" id="scene-run" data-step="3">
-    <div class="scene-head"><h2><span class="num">03</span>Run every test on both programs</h2>
-      <p>A test reveals the bug only if it passes on the correct program and fails on the faulty one.</p>
-      <button class="btn ghost" data-replay="3">Replay</button></div>
-    <div class="tests" id="testsRun"></div>
-    <div class="scoreline" id="runScore"></div>
-  </section>
-
-  <section class="scene" id="scene-vote" data-step="4">
-    <div class="scene-head"><h2><span class="num">04</span>Voters decide the expected value</h2>
-      <p>Eight implementations, written from the specification alone, run on an input the tester proposed. Their majority output becomes the expected value. Click a voter to read its code.</p>
-      <button class="btn ghost" data-replay="4">Replay</button></div>
-    <div class="lbl" style="margin-bottom:6px">Input proposed by the tester</div>
-    <div class="chips" id="callChips"></div>
-    <div class="voters" id="voters"></div>
-    <div class="tally"><div class="bar" id="tallyBar"></div></div>
-    <div class="verdict" id="verdict"></div>
-    <div class="drawer" id="voterCode" hidden></div>
-  </section>
-
-  <section class="scene" id="scene-rank" data-step="5">
-    <div class="scene-head"><h2><span class="num">05</span>Consensus ranking</h2>
-      <p>Tests whose voted value differs from what the faulty program returns move to the top. Every final test is still judged by running it on both programs.</p>
-      <button class="btn ghost" data-replay="5">Replay</button></div>
-    <div class="compare">
-      <div><h3 style="margin-bottom:8px">Tester alone</h3><div class="tests" id="rankPlain"></div><div class="scoreline" id="scorePlain"></div></div>
-      <div><h3 style="margin-bottom:8px">With execution consensus</h3><div class="tests" id="rankCons"></div><div class="scoreline" id="scoreCons"></div></div>
-    </div>
-  </section>
-
-  </details>
-
-  <section class="scene" id="results">
-    <div class="scene-head"><h2>Across all 593 external targets</h2>
-      <p id="resNote"></p></div>
-    <div class="chart" id="chart"></div>
-    <div class="legend"><span><i style="background:var(--accent)"></i>Kill@8: a revealing test among the first eight</span><span><i style="background:var(--ink)"></i>Kill@1: the first test reveals the bug</span></div>
-  </section>
-
-  <section class="scene" id="method">
-    <div class="scene-head"><h2>How it works</h2></div>
-    <div class="method">
-      <div><h3>Small models guess the value</h3><p>A fine-tuned 1.5B tester finds good inputs but often writes the wrong expected output, so its test fails on both programs.</p></div>
-      <div><h3>Execution answers instead</h3><p>Implementations written from the specification are run on the same input. Their majority output replaces the guess.</p></div>
-      <div><h3>Every number is checked</h3><p>Tests are always executed on both programs. Validation runs were pre-registered and run once.</p></div>
-    </div>
-    <dl class="terms">
-      <dt>Tester</dt><dd>The model that writes the tests (base 1.5B, our fine-tuned A@431, or UTGen-1.5B).</dd>
-      <dt>Voters</dt><dd>Eight implementations written from the specification and signature only.</dd>
-      <dt>Valid kill</dt><dd>Passes on the correct program and fails, errors or times out on the faulty one.</dd>
-      <dt>Kill@k</dt><dd>Share of targets with a valid kill among the first k tests.</dd>
-    </dl>
-  </section>
-
-  <div class="next"><b>Coming next:</b> write your own function and specification and watch the pipeline run on it.</div>
-  <footer>Recorded runs from the Oneiros project: tests, outcomes and rankings come from the saved per-test ledgers; voter outputs were re-executed in the project sandbox. Nothing on this page is generated live.</footer>
+  <footer>Explore uses recorded runs: tests and outcomes come from saved per-test logs, and voter outputs were re-executed in the project sandbox. Try your code runs Python in your browser.</footer>
 </main>
 
 <script src="data.js"></script>
 <script>
 (function () {
+  "use strict";
   const $ = (s, r = document) => r.querySelector(s);
-  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const wait = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+  const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+  const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+  const CODEI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>';
   const TESTERS = { base: "Base 1.5B", sft: "A@431 fine-tuned", utgen: "UTGen-1.5B" };
-  const CATS = {
-    valid_kill: ["Bug revealed", "good"], discriminating_wrong_oracle: ["Right input, wrong value", "bad"],
-    non_discriminating_input: ["Input misses the bug", ""], duplicate: ["Duplicate", ""], execution_failure: ["Did not run", "warn"],
-    parse_failure: ["No test parsed", ""], valid_non_kill: ["Check too weak", "warn"], correct_content_invalid_contract: ["Breaks test rules", "warn"]
-  };
-  const ST = { pass: ["PASS", "pass"], assertion_error: ["FAIL", "fail"], error: ["ERROR", "err"], timeout: ["TIMEOUT", "err"] };
-  let D, state = { ds: "All", pid: 0, tester: "base", code: "faulty", call: null }, token = 0;
+  const CAT = { valid_kill: ["Bug revealed", "good"], discriminating_wrong_oracle: ["Right input, wrong value", "bad"], non_discriminating_input: ["Input misses the bug", "n"],
+    duplicate: ["Duplicate", "n"], execution_failure: ["Did not run", "warn"], parse_failure: ["No test", "n"], valid_non_kill: ["Check too weak", "warn"], correct_content_invalid_contract: ["Breaks rules", "warn"] };
 
-  function boot(data) {
-    D = data;
-    const ds = ["All", ...new Set(D.problems.map((p) => p.dataset))];
-    const segDs = $("#dsSeg");
-    ds.forEach((d) => { const b = el("button", "", d); b.addEventListener("click", () => { state.ds = d; fillProblems(); }); segDs.append(b); });
-    const segT = $("#testerSeg");
-    Object.entries(TESTERS).forEach(([k, v]) => { const b = el("button", "", v); b.dataset.k = k; b.addEventListener("click", () => { state.tester = k; renderAll(false); }); segT.append(b); });
-    $("#probSel").addEventListener("change", (e) => { state.pid = +e.target.value; state.call = null; renderAll(false); });
-    document.querySelectorAll("#codeTabs button").forEach((b) => b.addEventListener("click", () => { state.code = b.dataset.v; renderCode(); }));
-    document.querySelectorAll(".step").forEach((b) => b.addEventListener("click", () => focusScene(+b.dataset.step, true)));
-    document.querySelectorAll("[data-replay]").forEach((b) => b.addEventListener("click", () => animate(+b.dataset.replay)));
-    $("#playBtn").addEventListener("click", playAll);
-    initGuide();
-    fillProblems();
-    renderResults();
+  function splitTest(code) {
+    const ops = ["==", "!=", "<=", ">=", " is not ", " is ", " not in ", " in ", "<", ">"];
+    let d = 0, q = null;
+    for (let i = 0; i < code.length; i++) {
+      const ch = code[i];
+      if (q) { if (ch === "\\") i++; else if (ch === q) q = null; continue; }
+      if (ch === "'" || ch === '"') { q = ch; continue; }
+      if ("([{".includes(ch)) d++; else if (")]}".includes(ch)) d--;
+      else if (d === 0) for (const op of ops) if (code.startsWith(op, i)) return { call: code.slice(0, i).trim(), op: op.trim(), exp: code.slice(i + op.length).trim() };
+    }
+    return { call: code.trim(), op: "", exp: "" };
   }
+  const markFor = (st) => st === "pass" ? ["p", "✓"] : st === "assertion_error" ? ["f", "✗"] : st === "error" || st === "timeout" ? ["e", "!"] : ["s", "–"];
 
-  function outcome(p) {
-    const t = p.testers.base, k8 = t.plain.some((r) => r.valid_kill), c1 = t.consensus.length && t.consensus[0].valid_kill;
-    return !k8 && c1 ? "rescued by consensus" : k8 && c1 ? "revealed either way" : !t.consensus.some((r) => r.valid_kill) ? "missed by both" : "mixed";
+  function lane(o) {
+    const L = el("div", "lane");
+    const nIn = el("div", "node pend"); nIn.append(el("small", "", "input"), el("div", "v part-in", o.call));
+    const nP = el("div", "node prog pend " + o.kind); nP.append(el("small", "", "program")); const pv = el("div", "v"); pv.append(el("span", "dot " + o.kind), document.createTextNode(o.label)); nP.append(pv);
+    const outTxt = o.out == null ? "error" : String(o.out);
+    const nO = el("div", "node pend"); nO.append(el("small", "", "returns"), el("div", "v", outTxt));
+    const nA = el("div", "node pend"); nA.append(el("small", "", "assertion"));
+    const av = el("div", "v"); av.append(el("span", "", outTxt + " "), el("span", "part-op", (o.op || "==") + " "), el("span", "part-ex", o.exp)); nA.append(av);
+    const s = o.status, skip = !s;
+    const vd = el("div", "verdict pend " + (skip ? "skip" : s === "pass" ? "pass" : "fail"), skip ? "not run" : s === "pass" ? "✓ PASS" : s === "assertion_error" ? "✗ FAIL" : "✗ " + (s === "timeout" ? "TIMEOUT" : "ERROR"));
+    if (skip && o.note) vd.title = o.note;
+    const ls = [el("div", "link"), el("div", "link"), el("div", "link")];
+    L.append(nIn, ls[0], nP, ls[1], nO, ls[2], nA, vd);
+    return { L, steps: [nIn, ls[0], nP, ls[1], nO, ls[2], nA, vd], skip };
   }
-  function fillProblems() {
-    document.querySelectorAll("#dsSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === state.ds)));
-    const sel = $("#probSel"); sel.innerHTML = "";
-    D.problems.forEach((p, i) => {
-      if (state.ds !== "All" && p.dataset !== state.ds) return;
-      const o = el("option", "", `${p.entry}  ·  ${p.dataset}  ·  ${outcome(p)}`); o.value = i; sel.append(o);
-    });
-    if (![...sel.options].some((o) => +o.value === state.pid)) state.pid = +sel.options[0].value;
-    sel.value = state.pid; state.call = null; renderAll(false);
+  async function playLane(l, my) {
+    const [nIn, a, nP, b, nO, c, nA, vd] = l.steps, live = () => my === tok;
+    nIn.classList.remove("pend"); await sleep(250); if (!live()) return;
+    a.classList.add("on"); await sleep(300); nP.classList.remove("pend"); nP.classList.add("run"); await sleep(650); if (!live()) return;
+    nP.classList.remove("run"); b.classList.add("on"); await sleep(280); nO.classList.remove("pend"); await sleep(260); if (!live()) return;
+    if (l.skip) { nA.classList.remove("pend"); nA.style.opacity = .35; vd.classList.remove("pend"); return; }
+    c.classList.add("on"); await sleep(280); nA.classList.remove("pend"); await sleep(380); if (!live()) return; vd.classList.remove("pend");
   }
-  const P = () => D.problems[state.pid];
-  const T = () => P().testers[state.tester];
+  function banner(kind, icon, title, sub) { const b = el("div", "banner pend " + kind); b.append(el("div", "ico", icon)); const t = el("div"); t.append(el("b", "", title), el("span", "", sub)); b.append(t); return b; }
 
-  function renderAll(anim) {
-    document.querySelectorAll("#testerSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === state.tester)));
-    const p = P();
-    $("#spec").textContent = p.spec || "(no specification text)";
-    const meta = $("#meta"); meta.innerHTML = "";
-    [p.dataset, p.short, `entry point: ${p.entry}`, p.split === "not_in_train_or_dev" ? "not in our training data" : "problem also in our training data"]
-      .forEach((t, i) => meta.append(el("span", i === 0 ? "tag accent" : "tag", t)));
-    renderCode(); renderTests(false); renderRun(false); renderVoters(false); renderRank(false);
-    renderGuide();
-  }
-
-  function lcsDiff(a, b) {
-    const n = a.length, m = b.length, dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
-    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
-    const out = []; let i = 0, j = 0;
-    while (i < n && j < m) { if (a[i] === b[j]) { out.push(["", a[i]]); i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) out.push(["del", a[i++]]); else out.push(["add", b[j++]]); }
-    while (i < n) out.push(["del", a[i++]]); while (j < m) out.push(["add", b[j++]]);
-    return out;
-  }
-  function renderCode() {
-    document.querySelectorAll("#codeTabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.v === state.code)));
-    const p = P(), pre = $("#code"); pre.innerHTML = "";
-    const lines = state.code === "diff" ? lcsDiff(p.correct.split("\n"), p.faulty.split("\n")).filter((x, k, arr) => x[0] || (arr[k - 1] && arr[k - 1][0]) || (arr[k + 1] && arr[k + 1][0]))
-      : (state.code === "correct" ? p.correct : p.faulty).split("\n").map((l) => ["", l]);
-    lines.forEach(([k, l]) => pre.append(el("span", "ln " + k, l || " ")));
+  let D, S = { ds: "All", pid: 0, tester: "base", stage: 0, test: null, call: null }, tok = 0, auto = null;
+  const P = () => D.problems[S.pid], T = () => P().testers[S.tester];
+  function outcome(p) { const t = p.testers.base, k8 = t.plain.some((r) => r.valid_kill), c1 = t.consensus[0] && t.consensus[0].valid_kill;
+    return !k8 && c1 ? "rescued by consensus" : k8 && c1 ? "revealed either way" : "missed by both"; }
+  function callOf(code) { if (!code) return null; const keys = Object.keys(P().calls).filter((k) => code.includes(k)).sort((a, b) => b.length - a.length); return keys[0] || splitTest(code).call; }
+  function focus() {
+    const t = T(); const cons = t.consensus.find((r) => r.valid_kill) || t.consensus[0];
+    const call = callOf(cons && cons.code);
+    const test = t.plain.find((r) => r.code && callOf(r.code) === call && r.category === "discriminating_wrong_oracle") || t.plain.find((r) => r.code && callOf(r.code) === call) || t.plain.find((r) => r.code);
+    return { cons, call, test };
   }
 
-  function rowBase(r, cols) {
-    const row = el("div", "trow");
-    row.append(el("span", "rk", "#" + r.rank));
-    if (r.code) { const c = el("code", "", "assert " + r.code); row.append(c); } else row.append(el("span", "none", "no test could be read from this output"));
-    return row;
+  const STAGES = [
+    { k: "Input", t: "What the model sees", s: "A short specification and the faulty function. The correct version stays hidden.", v: stInput },
+    { k: "Tests", t: "The model writes eight tests", s: "Each test pairs an input with the value it expects. Click one to run it.", v: stTests },
+    { k: "Execute", t: "Run one test on both programs", s: "It reveals the bug only if it passes on the correct program and fails on the faulty one.", v: stExec },
+    { k: "All tests", t: "All eight tests, both programs", s: "Kill@8: at least one of the eight tests reveals the bug.", v: stAll },
+    { k: "Voters", t: "Voters write the function and vote", s: "Eight implementations from the specification alone run on the tester's input.", v: stVote },
+    { k: "Consensus", t: "The consensus test", s: "The voted value replaces the model's guess and runs on both programs.", v: stCons },
+    { k: "Score", t: "Before and after", s: "Tests the voters predict will reveal the bug move to the top.", v: stScore },
+  ];
+  function buildRail() {
+    const r = $("#rail"); r.innerHTML = "";
+    STAGES.forEach((st, i) => { const b = el("button", i === S.stage ? "cur" : i < S.stage ? "done" : ""); b.append(el("b", "", String(i + 1).padStart(2, "0")), el("span", "", st.k));
+      if (i === S.stage) b.setAttribute("aria-current", "step"); b.addEventListener("click", () => { stopAuto(); go(i); }); r.append(b); });
   }
-  function renderTests(anim) {
-    const box = $("#testsWrite"); box.innerHTML = "";
-    T().plain.forEach((r) => { const row = rowBase(r); row.style.gridTemplateColumns = "34px minmax(0,1fr)"; if (anim) row.classList.add("hidden"); box.append(row); });
-    return box;
-  }
-  function stChip(status, out) {
-    const [t, c] = ST[status] || [out != null ? "SKIPPED" : "—", ""]; const s = el("span", "st " + c, t);
-    if (!status && out != null) s.title = "Not scored: the test already failed on the correct program";
-    if (out != null) s.append(el("small", "", "returns " + out));
-    return s;
-  }
-  function catPill(cat) { const [t, c] = CATS[cat] || [cat || "—", ""]; const s = el("span", "pill " + c, t); const w = el("span", "catcell"); w.append(s); return w; }
-  function renderRun(anim) {
-    const box = $("#testsRun"); box.innerHTML = "";
-    const head = el("div", "trow head"); ["", "Test", "Correct", "Faulty"].forEach((h) => head.append(el("span", "", h))); const hc = el("span", "catcell", "Outcome"); head.append(hc); box.append(head);
-    const rows = T().plain.map((r) => {
-      const row = rowBase(r);
-      const a = anim ? el("span", "st", "…") : stChip(r.code ? r.ref_status : null, r.ref_out);
-      const b = anim ? el("span", "st", "…") : stChip(r.code ? r.bug_status : null, r.bug_out);
-      const c = anim ? (() => { const w = el("span", "catcell"); w.append(el("span", "pill", "waiting")); return w; })() : catPill(r.category);
-      row.append(a, b, c); box.append(row); return { row, r, a, b, c };
-    });
-    scoreLine($("#runScore"), T().plain, anim);
-    return rows;
-  }
-  function scoreLine(box, list, hide) {
-    box.innerHTML = ""; if (hide) return;
-    const first = list.find((r) => r.valid_kill);
-    const a = el("div", "score"); a.innerHTML = "Kill@1: <b>" + (list[0] && list[0].valid_kill ? "yes" : "no") + "</b>";
-    const b = el("div", "score"); b.innerHTML = "Kill@8: <b>" + (first ? "yes, first at #" + first.rank : "no") + "</b>";
-    const n = list.filter((r) => r.category === "discriminating_wrong_oracle").length;
-    const c = el("div", "score"); c.innerHTML = "Right input, wrong value: <b>" + n + " of " + list.length + "</b>";
-    box.append(a, b, c);
+  function go(i) {
+    S.stage = Math.max(0, Math.min(STAGES.length - 1, i)); const my = ++tok; buildRail();
+    const st = STAGES[S.stage]; $("#sTitle").textContent = st.t; $("#sSub").textContent = st.s;
+    $("#bPrev").disabled = S.stage === 0; $("#bNext").textContent = S.stage === STAGES.length - 1 ? "Restart ↺" : "Next →";
+    const c = $("#canvas"); c.innerHTML = ""; st.v(c, my);
   }
 
-  function callsFor() {
-    const p = P(), keys = Object.keys(p.calls), seen = [];
-    [...T().consensus, ...T().plain].forEach((r) => { if (!r.code) return; keys.forEach((k) => { if (r.code.includes(k) && !seen.includes(k)) seen.push(k); }); });
-    return seen.length ? seen : keys;
+  function stInput(c) {
+    const p = P(); const g = el("div", "three");
+    const a = el("div", "card"); a.append(el("h3", "", "Specification"), el("p", "spec", p.spec || "(no description)"));
+    const b = el("div", "card"); b.innerHTML = '<h3><span class="dot bad"></span>Faulty function</h3>'; b.append(el("pre", "code", p.faulty));
+    const l = el("div", "locked"); l.innerHTML = LOCK; l.append(el("b", "", "Correct function"), el("span", "", "hidden from the model, used only to score tests"));
+    const rv = el("button", "btn ghost", "Peek"); rv.addEventListener("click", () => { l.className = "card"; l.innerHTML = '<h3><span class="dot good"></span>Correct function</h3>'; l.append(el("pre", "code", p.correct)); }); l.append(rv);
+    g.append(a, b, l); c.append(g);
+    const m = el("div", "kpis"); [["dataset", p.dataset], ["problem", p.short], ["function", p.entry]].forEach(([k, v]) => { const x = el("div", "kpi"); x.append(el("span", "lab", k), el("b", "", v)); m.append(x); }); c.append(m);
   }
-  function renderVoters(anim) {
-    const p = P(), calls = callsFor();
-    if (!state.call || !calls.includes(state.call)) state.call = calls[0];
-    const chips = $("#callChips"); chips.innerHTML = "";
-    calls.slice(0, 12).forEach((c) => { const b = el("button", "chip", c); b.setAttribute("aria-pressed", String(c === state.call)); b.title = c;
-      b.addEventListener("click", () => { state.call = c; renderVoters(true); animate(4); }); chips.append(b); });
-    const info = p.calls[state.call] || { voters: [], voted: null, votes: 0, correct: null, faulty: null };
-    const vbox = $("#voters"); vbox.innerHTML = ""; $("#voterCode").hidden = true;
-    const cards = p.voters.map((code, i) => {
-      const b = el("button", "voter" + (anim ? " wait" : "")); b.append(el("div", "vn", "Voter " + (i + 1)));
-      const out = info.voters[i]; const v = el("div", "vo", anim ? "…" : (code == null ? "no code" : out == null ? "error" : out));
-      b.append(v); if (!anim && out != null && out === info.voted) b.classList.add("maj");
-      b.addEventListener("click", () => showVoter(i)); vbox.append(b); return { b, v, out, code };
-    });
-    drawTally(info, anim); drawVerdict(info, anim);
-    return { cards, info };
+  async function stTests(c, my) {
+    const f = focus(); const deck = el("div", "deck"); c.append(deck);
+    const cards = T().plain.map((r) => { const b = el("button", "tcard out"); b.append(el("div", "n", "#" + r.rank));
+      const cc = el("div", "c");
+      if (r.code) { const s = splitTest(r.code); cc.append(el("span", "part-in", s.call)); const e = el("span"); e.append(el("span", "part-op", s.op + " "), el("span", "part-ex", s.exp)); cc.append(e); }
+      else cc.append(el("span", "part-op", "no readable test"));
+      b.append(cc); if (r === f.test) b.style.borderColor = "var(--accent)";
+      b.addEventListener("click", () => { if (!r.code) return; S.test = r.rank; stopAuto(); go(2); }); deck.append(b); return b; });
+    const leg = el("div", "kpis"); [["inp", "input (function call)"], ["acc", "expected value (the model's guess)"]].forEach(([d, t]) => { const k = el("div", "kpi"); k.append(el("span", "dot " + d), el("span", "", t)); leg.append(k); }); c.append(leg);
+    for (const b of cards) { await sleep(110); if (my !== tok) return; b.classList.remove("out"); }
   }
-  function showVoter(i) {
-    const p = P(), box = $("#voterCode"); box.hidden = false; box.innerHTML = "";
-    const h = el("div", "scene-head"); h.append(el("h3", "", "Voter " + (i + 1) + ": written from the specification only"));
-    const x = el("button", "btn ghost", "Close"); x.addEventListener("click", () => (box.hidden = true)); h.append(x);
-    const pre = el("pre", "code"); (p.voters[i] || "(the model's output had no usable function)").split("\n").forEach((l) => pre.append(el("span", "ln", l || " ")));
-    box.append(h, pre);
+  async function runPair(c, my, r, title) {
+    const s = splitTest(r.code), call = callOf(r.code) || s.call, info = P().calls[call] || {};
+    const top = el("div", "callbar"); top.append(el("span", "lab", title), el("span", "pillv inp", call), el("span", "part-op", s.op || "=="), el("span", "pillv exp", s.exp)); c.append(top);
+    const run = el("div", "runner"); c.append(run);
+    const l1 = lane({ label: "Correct", kind: "good", call, out: r.ref_out ?? info.correct, op: s.op, exp: s.exp, status: r.ref_status });
+    const l2 = lane({ label: "Faulty", kind: "bad", call, out: r.bug_out ?? info.faulty, op: s.op, exp: s.exp, status: r.bug_status, note: "Not scored: the test already failed on the correct program" });
+    run.append(l1.L, l2.L);
+    return { s, call, info, go: async (bn) => { await playLane(l1, my); if (my !== tok) return; await sleep(200); await playLane(l2, my); if (my !== tok) return; await sleep(250); bn.classList.remove("pend"); } };
   }
-  function drawTally(info, hide) {
-    const bar = $("#tallyBar"); bar.innerHTML = ""; if (hide) return;
+  async function stExec(c, my) {
+    const t = T(), f = focus(); const tests = t.plain.filter((r) => r.code);
+    const r = tests.find((x) => x.rank === S.test) || f.test; S.test = r.rank;
+    const tabs = el("div", "testtabs"); tests.forEach((x) => { const b = el("button", "", "#" + x.rank); b.prepend(el("span", "dot " + (x.valid_kill ? "good" : x.ref_status === "pass" ? "inp" : "bad")));
+      b.setAttribute("aria-pressed", String(x === r)); b.addEventListener("click", () => { S.test = x.rank; stopAuto(); go(2); }); tabs.append(b); }); c.append(tabs);
+    const pr = await runPair(c, my, r, "test");
+    const [lab, kind] = CAT[r.category] || [r.category, "n"];
+    const why = r.category === "valid_kill" ? "Passes on the correct program, fails on the faulty one." : r.category === "discriminating_wrong_oracle"
+      ? `Good input, wrong value: the correct program returns ${r.ref_out ?? pr.info.correct}, not ${pr.s.exp}.` : r.category === "non_discriminating_input" ? "Both programs return the same value on this input." : "This test does not reveal the bug.";
+    const bn = banner(kind === "good" ? "good" : kind === "bad" ? "bad" : "neutral", kind === "good" ? "✓" : "✗", lab, why); c.append(bn);
+    pr.go(bn);
+  }
+  async function stAll(c, my) {
+    const t = T(); const m = el("div", "matrix"); c.append(m);
+    const h = el("div", "mrow head"); ["", "test", "correct", "faulty", "outcome"].forEach((x) => h.append(el("span", "", x))); m.append(h);
+    const rows = t.plain.map((r) => { const row = el("div", "mrow pend"); row.append(el("span", "lab", "#" + r.rank));
+      row.append(el("code", "", r.code ? r.code : "no readable test"));
+      [r.ref_status, r.bug_status].forEach((st) => { const [k, sym] = markFor(r.code ? st : null); const mk = el("span", "mark " + k, sym); mk.title = st || "not run"; row.append(mk); });
+      const [lab, kind] = CAT[r.category] || [r.category, "n"]; row.append(el("span", "vtag " + kind, lab)); m.append(row); return row; });
+    const k = el("div", "kpis"); c.append(k);
+    for (const row of rows) { await sleep(120); if (my !== tok) return; row.classList.remove("pend"); }
+    kpiLine(k, t.plain);
+  }
+  function kpiLine(box, list) {
+    box.innerHTML = ""; const first = list.find((r) => r.valid_kill);
+    [["Kill@1", list[0] && list[0].valid_kill], ["Kill@8", !!first]].forEach(([n, ok]) => { const x = el("div", "kpi"); x.append(el("span", "", n), el("b", ok ? "yes" : "no", ok ? "yes" : "no")); box.append(x); });
+    const w = list.filter((r) => r.category === "discriminating_wrong_oracle").length; const x = el("div", "kpi"); x.append(el("span", "dot bad"), el("span", "", "right input, wrong value"), el("b", "", w + " / " + list.length)); box.append(x);
+  }
+  async function stVote(c, my) {
+    const p = P(), f = focus(); const calls = []; [...T().consensus, ...T().plain].forEach((r) => { const k = callOf(r.code); if (k && p.calls[k] && !calls.includes(k)) calls.push(k); });
+    if (!calls.length) { c.append(el("div", "locked", "No inputs with recorded votes for this tester.")); return; }
+    if (!S.call || !calls.includes(S.call)) S.call = f.call && calls.includes(f.call) ? f.call : calls[0];
+    const ch = el("div", "chips"); calls.slice(0, 10).forEach((k) => { const b = el("button", "", k); b.title = k; b.setAttribute("aria-pressed", String(k === S.call)); b.addEventListener("click", () => { S.call = k; stopAuto(); go(4); }); ch.append(b); });
+    c.append(el("span", "lab", "input from the tester"), ch);
+    const info = p.calls[S.call]; const g = el("div", "vgrid"); c.append(g);
+    const drawer = el("div", "drawer"); drawer.hidden = true;
+    const tiles = p.voters.map((code, i) => { const t = el("button", "vtile"); t.setAttribute("aria-label", "Voter " + (i + 1) + ": show its code");
+      const fr = el("div", "face front"); fr.innerHTML = CODEI; fr.append(el("small", "", "voter " + (i + 1)));
+      const out = info.voters[i]; const bk = el("div", "face back"); bk.append(el("small", "", "voter " + (i + 1)), el("div", "o", code == null ? "no code" : out == null ? "error" : out));
+      t.append(fr, bk); t.addEventListener("click", () => showVoter(i, drawer)); g.append(t); return { t, out }; });
+    const tally = el("div", "tally"); const res = el("div", "kpis"); c.append(tally, res, drawer);
+    for (const v of tiles) { await sleep(170); if (my !== tok) return; v.t.classList.add("flip"); }
+    await sleep(500); if (my !== tok) return; tiles.forEach((v) => { if (v.out != null && v.out === info.voted) v.t.classList.add("maj"); });
     const counts = {}; info.voters.forEach((v) => { const k = v == null ? "error" : v; counts[k] = (counts[k] || 0) + 1; });
-    const total = info.voters.length || 8;
-    Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => {
-      const d = el("div", "", n + " × " + k); d.style.width = (100 * n / total) + "%";
-      d.style.background = k === info.voted ? "var(--accent)" : k === "error" ? "var(--warn)" : "var(--muted)"; d.title = n + " voters returned " + k; bar.append(d);
-    });
+    Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => { const d = el("div", "", n + " × " + k); d.style.background = k === info.voted ? "var(--accent)" : k === "error" ? "var(--warn)" : "var(--dim)"; d.title = n + " voters returned " + k; tally.append(d);
+      requestAnimationFrame(() => requestAnimationFrame(() => (d.style.width = (100 * n / info.voters.length) + "%"))); });
+    await sleep(600); if (my !== tok) return;
+    const rev = info.voted != null && info.voted !== info.faulty, right = info.voted === info.correct;
+    [["dot acc", "voted", info.voted ?? "none"], ["dot bad", "faulty returns", info.faulty ?? "error"], ["dot good", "correct returns", info.correct ?? "error"]].forEach(([d, k, v]) => { const x = el("div", "kpi"); x.append(el("span", d), el("span", "", k), el("b", "mono", v)); res.append(x); });
+    const b = banner(rev && right ? "good" : "bad", rev && right ? "✓" : "✗", rev ? (right ? "The vote differs from the faulty output, and it is right" : "The vote differs from the faulty output, but it is wrong") : "The vote matches the faulty output",
+      rev ? "A test with this value should reveal the bug." : "This input cannot reveal the bug."); c.insertBefore(b, drawer); requestAnimationFrame(() => b.classList.remove("pend"));
   }
-  function drawVerdict(info, hide) {
-    const box = $("#verdict"); box.innerHTML = ""; if (hide) return;
-    const reveal = info.voted != null && info.voted !== info.faulty, right = info.voted != null && info.voted === info.correct;
-    [["Voted value", info.voted == null ? "no agreement" : info.voted + "  (" + info.votes + " of " + info.voters.length + ")"],
-     ["Faulty program returns", info.faulty == null ? "error" : info.faulty, reveal ? "differs: this test should reveal the bug" : "same value: this input cannot reveal the bug"],
-     ["Correct program returns", info.correct == null ? "error" : info.correct, right ? "the vote was right" : "the vote was wrong"]]
-      .forEach(([k, v, note], i) => { const c = el("div", "card"); c.append(el("div", "k", k), el("div", "v", v));
-        if (note) { const s = el("span", "pill " + (i === 1 ? (reveal ? "good" : "") : right ? "good" : "bad"), note); s.style.marginTop = "6px"; s.style.display = "inline-block"; c.append(s); }
-        box.append(c); });
+  function showVoter(i, drawer) { const p = P(); drawer.hidden = false; drawer.innerHTML = ""; const h = el("div", "stage-head"); h.style.padding = "0 0 8px"; h.style.border = "0";
+    h.append(el("h3", "", "Voter " + (i + 1) + " · written from the specification only")); const x = el("button", "btn ghost", "Close"); x.addEventListener("click", () => (drawer.hidden = true)); h.append(x);
+    drawer.append(h, el("pre", "code", p.voters[i] || "(no usable function in this output)")); drawer.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "nearest" }); }
+  async function stCons(c, my) {
+    const r = focus().cons; if (!r || !r.code) { c.append(el("div", "locked", "No consensus test for this tester.")); return; }
+    const pr = await runPair(c, my, r, "consensus test");
+    const bn = r.valid_kill ? banner("good", "✓", "Bug revealed", "Passes on the correct program, fails on the faulty one.") : banner("bad", "✗", (CAT[r.category] || [r.category])[0], "This consensus test does not reveal the bug.");
+    c.append(bn); pr.go(bn);
+  }
+  async function stScore(c, my) {
+    const t = T(); const big = el("div", "big"); c.append(big);
+    const k = (list, n) => n === 1 ? !!(list[0] && list[0].valid_kill) : list.some((r) => r.valid_kill);
+    [["Kill@1", 1], ["Kill@8", 8]].forEach(([lab, n]) => { const a = k(t.plain, n), b = k(t.consensus, n); const x = el("div", "bignum"); x.append(el("small", "", lab + " · tester → with consensus"));
+      const d = el("div"); d.append(el("span", a ? "yes" : "no", a ? "yes" : "no"), el("span", "part-op", "→"), el("span", b ? "yes" : "no", b ? "yes" : "no")); x.append(d); big.append(x); });
+    const cmp = el("div", "cmp"); c.append(cmp);
+    const col = (title, list) => { const w = el("div"); const h = el("h3", "", title); h.style.marginBottom = "8px"; w.append(h); const m = el("div", "matrix"); w.append(m);
+      const rows = list.map((r) => { const row = el("div", "mrow pend"); row.style.gridTemplateColumns = "28px minmax(0,1fr) auto"; row.append(el("span", "lab", "#" + r.rank));
+        row.append(el("code", "", r.code || "no readable test")); const [lab, kind] = CAT[r.category] || [r.category, "n"]; row.append(el("span", "vtag " + kind, lab)); m.append(row); return row; });
+      cmp.append(w); return rows; };
+    const a = col("Tester alone", t.plain), b = col("With consensus", t.consensus);
+    for (let i = 0; i < 8; i++) { await sleep(110); if (my !== tok) return; if (a[i]) a[i].classList.remove("pend"); if (b[i]) b[i].classList.remove("pend"); }
   }
 
-  function renderRank(anim) {
-    const fill = (box, list) => { box.innerHTML = ""; return list.map((r) => { const row = rowBase(r); row.append(catPill(r.category)); if (anim) row.classList.add("hidden"); box.append(row); return row; }); };
-    const a = fill($("#rankPlain"), T().plain), b = fill($("#rankCons"), T().consensus);
-    scoreLine($("#scorePlain"), T().plain, anim); scoreLine($("#scoreCons"), T().consensus, anim);
-    return { a, b };
+  function stopAuto() { if (auto) { clearTimeout(auto); auto = null; $("#bPlay").textContent = "Play"; } }
+  function startAuto() { $("#bPlay").textContent = "Pause"; const step = () => { if (S.stage >= STAGES.length - 1) return stopAuto(); go(S.stage + 1); auto = setTimeout(step, 6500); }; go(S.stage); auto = setTimeout(step, 6500); }
+  function fillProblems() {
+    document.querySelectorAll("#dsSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === S.ds)));
+    const sel = $("#probSel"); sel.innerHTML = "";
+    D.problems.forEach((p, i) => { if (S.ds !== "All" && p.dataset !== S.ds) return; const o = el("option", "", `${p.entry}  ·  ${p.dataset}  ·  ${outcome(p)}`); o.value = i; sel.append(o); });
+    if (![...sel.options].some((o) => +o.value === S.pid)) S.pid = +sel.options[0].value; sel.value = S.pid; S.test = null; S.call = null; go(S.stage);
   }
-
-  function focusScene(n, scroll) {
-    if (scroll) $("#full").open = true;
-    document.querySelectorAll(".step").forEach((s) => s.classList.toggle("on", +s.dataset.step === n));
-    document.querySelectorAll("section.scene").forEach((s) => s.classList.toggle("focus", +s.dataset.step === n));
-    const target = document.querySelector('section.scene[data-step="' + n + '"]');
-    if (scroll && target) target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-  }
-  async function animate(n) {
-    const my = ++token; focusScene(n, false);
-    if (n === 1) { const pre = $("#code"); pre.style.opacity = .2; await wait(250); pre.style.transition = "opacity .5s"; pre.style.opacity = 1; return; }
-    if (n === 2) { const box = renderTests(true); for (const row of box.children) { await wait(170); if (my !== token) return; row.classList.remove("hidden"); } return; }
-    if (n === 3) {
-      const rows = renderRun(true);
-      for (const { r, a, b, c } of rows) {
-        if (my !== token) return;
-        if (!r.code) { a.replaceWith(stChip(null)); b.replaceWith(stChip(null)); c.replaceWith(catPill(r.category)); continue; }
-        a.className = "st run"; a.textContent = "running"; await wait(260); if (my !== token) return;
-        a.replaceWith(stChip(r.ref_status, r.ref_out));
-        b.className = "st run"; b.textContent = "running"; await wait(260); if (my !== token) return;
-        b.replaceWith(stChip(r.bug_status, r.bug_out)); await wait(80); c.replaceWith(catPill(r.category));
-      }
-      scoreLine($("#runScore"), T().plain, false); return;
-    }
-    if (n === 4) {
-      const { cards, info } = renderVoters(true);
-      for (const { b, v, out, code } of cards) { await wait(190); if (my !== token) return;
-        b.classList.remove("wait"); b.classList.add("pop"); v.textContent = code == null ? "no code" : out == null ? "error" : out;
-        setTimeout(() => b.classList.remove("pop"), 250); }
-      await wait(250); if (my !== token) return;
-      cards.forEach(({ b, out }) => { if (out != null && out === info.voted) b.classList.add("maj"); });
-      drawTally(info, false); await wait(350); drawVerdict(info, false); return;
-    }
-    if (n === 5) {
-      const { a, b } = renderRank(true);
-      for (let k = 0; k < Math.max(a.length, b.length); k++) { await wait(140); if (my !== token) return; if (a[k]) a[k].classList.remove("hidden"); if (b[k]) b[k].classList.remove("hidden"); }
-      scoreLine($("#scorePlain"), T().plain, false); scoreLine($("#scoreCons"), T().consensus, false);
-    }
-  }
-  async function playAll() {
-    const btn = $("#playBtn"); btn.disabled = true; btn.textContent = "Running…";
-    for (let n = 1; n <= 5; n++) { focusScene(n, true); await wait(450); await animate(n); await wait(700); }
-    btn.disabled = false; btn.textContent = "Run pipeline";
+  function bootExplore() {
+    ["All", ...new Set(D.problems.map((p) => p.dataset))].forEach((d) => { const b = el("button", "", d); b.addEventListener("click", () => { S.ds = d; fillProblems(); }); $("#dsSeg").append(b); });
+    Object.entries(TESTERS).forEach(([k, v]) => { const b = el("button", "", v); b.dataset.k = k; b.setAttribute("aria-pressed", String(k === S.tester));
+      b.addEventListener("click", () => { S.tester = k; S.test = null; S.call = null; document.querySelectorAll("#testerSeg button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.k === k))); go(S.stage); }); $("#testerSeg").append(b); });
+    $("#probSel").addEventListener("change", (e) => { S.pid = +e.target.value; S.test = null; S.call = null; go(S.stage); });
+    $("#bPrev").addEventListener("click", () => { stopAuto(); go(S.stage - 1); });
+    $("#bNext").addEventListener("click", () => { stopAuto(); go(S.stage === STAGES.length - 1 ? 0 : S.stage + 1); });
+    $("#bPlay").addEventListener("click", () => (auto ? stopAuto() : startAuto()));
+    document.addEventListener("keydown", (e) => { if ($('[data-view="explore"]').hidden || e.target.closest("input, textarea, select")) return;
+      if (e.key === "ArrowRight") { stopAuto(); go(S.stage + 1); } if (e.key === "ArrowLeft") { stopAuto(); go(S.stage - 1); } });
+    fillProblems();
   }
 
   function renderResults() {
-    const S = D.summary; $("#resNote").textContent = S.note;
-    const rows = S.rows, W = 760, rowH = 46, left = 220, right = 40, top = 10, H = top + rows.length * rowH + 30, x = (v) => left + (W - left - right) * v / 100;
+    const Sm = D.summary; $("#resNote").textContent = Sm.note;
+    const st = $("#stats"); st.innerHTML = "";
+    [["+13.8", "Kill@8 points from execution consensus, no training"], ["19 → 50%", "problems where the first test reveals the bug"], ["≈ 0", "gain from a tester five times larger"]]
+      .forEach(([b, s]) => { const x = el("div", "stat"); x.append(el("b", "", b), el("span", "", s)); st.append(x); });
+    const rows = Sm.rows, W = 760, rowH = 46, left = 230, right = 44, top = 8, H = top + rows.length * rowH + 30, x = (v) => left + (W - left - right) * v / 100;
     const css = getComputedStyle(document.documentElement), c = (n) => css.getPropertyValue(n).trim();
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kill@8 and Kill@1 by system">`;
-    [0, 25, 50, 75, 100].forEach((t) => { s += `<line x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 24}" stroke="${c("--line")}" />` +
-      `<text x="${x(t)}" y="${H - 8}" fill="${c("--muted")}" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">${t}%</text>`; });
-    rows.forEach((r, i) => {
-      const y = top + i * rowH, cons = /consensus/.test(r.system);
-      s += `<text x="${left - 10}" y="${y + 20}" fill="${c("--ink")}" font-size="13" text-anchor="end" font-weight="${cons ? 600 : 400}" font-family="Inter, sans-serif">${r.system}</text>`;
-      s += `<rect x="${x(0)}" y="${y + 6}" width="${x(r.kill8) - x(0)}" height="16" rx="3" fill="${c("--accent")}" opacity="${cons ? 1 : .55}" />`;
-      s += `<text x="${x(r.kill8) + 6}" y="${y + 19}" fill="${c("--ink")}" font-size="12" font-family="JetBrains Mono, monospace">${r.kill8}</text>`;
-      s += `<rect x="${x(0)}" y="${y + 25}" width="${x(r.kill1) - x(0)}" height="9" rx="2" fill="${c("--ink")}" opacity="${cons ? .9 : .45}" />`;
-      s += `<text x="${x(r.kill1) + 6}" y="${y + 34}" fill="${c("--muted")}" font-size="11" font-family="JetBrains Mono, monospace">${r.kill1}</text>`;
-    });
+    [0, 25, 50, 75, 100].forEach((t) => { s += `<line x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 24}" stroke="${c("--line")}"/><text x="${x(t)}" y="${H - 8}" fill="${c("--dim")}" font-size="11" text-anchor="middle" font-family="JetBrains Mono, monospace">${t}%</text>`; });
+    rows.forEach((r, i) => { const y = top + i * rowH, cons = /consensus/.test(r.system);
+      s += `<text x="${left - 12}" y="${y + 19}" fill="${c("--ink")}" font-size="13" text-anchor="end" font-weight="${cons ? 700 : 500}" font-family="Inter, sans-serif">${r.system}</text>`;
+      s += `<rect x="${x(0)}" y="${y + 6}" width="${x(r.kill8) - x(0)}" height="16" rx="4" fill="${c("--accent")}" opacity="${cons ? 1 : .45}"/><text x="${x(r.kill8) + 6}" y="${y + 19}" fill="${c("--ink")}" font-size="12" font-family="JetBrains Mono, monospace">${r.kill8}</text>`;
+      s += `<rect x="${x(0)}" y="${y + 25}" width="${x(r.kill1) - x(0)}" height="8" rx="3" fill="${c("--ink")}" opacity="${cons ? .85 : .35}"/><text x="${x(r.kill1) + 6}" y="${y + 33}" fill="${c("--dim")}" font-size="11" font-family="JetBrains Mono, monospace">${r.kill1}</text>`; });
     $("#chart").innerHTML = s + "</svg>";
   }
-  /* ---------------- guided walkthrough ---------------- */
-  let g = 0, gToken = 0, gTimer = null;
-  function splitAssert(code, call) {
-    const rest = code.slice(code.indexOf(call) + call.length).trim();
-    const m = rest.match(/^(==|!=|is not|is|<=|>=|<|>)\s*([\s\S]*)$/);
-    return m ? { op: m[1], value: m[2].trim() } : { op: "", value: rest };
-  }
-  function focusCall() {
-    const p = P(), t = T(), keys = Object.keys(p.calls);
-    const find = (r) => r && r.code ? keys.filter((k) => r.code.includes(k)).sort((a, b) => b.length - a.length)[0] : null;
-    let call = find(t.consensus.find((r) => r.valid_kill)) || find(t.consensus[0]) || find(t.plain[0]) || keys[0];
-    let test = t.plain.find((r) => r.code && r.code.includes(call) && r.category === "discriminating_wrong_oracle")
-      || t.plain.find((r) => r.code && r.code.includes(call)) || t.plain.find((r) => r.code);
-    if (test && !test.code.includes(call)) call = find(test) || call;
-    const cons = t.consensus.find((r) => r.code && r.code.includes(call)) || t.consensus[0];
-    return { call, test, cons, info: p.calls[call] || null };
-  }
-  function traceSteps(call, value, op, out, status, who) {
-    const passed = status === "pass", crashed = status === "error" || status === "timeout";
-    const steps = [["Call the function", `${call}`], ["The " + who + " program returns", crashed ? (status === "timeout" ? "no answer: time limit reached" : "an error is raised") : String(out)]];
-    if (!crashed) steps.push(["Check the assertion", `${out} ${op || "=="} ${value}   →   ${passed ? "true" : "false"}`]);
-    steps.push(["Result", passed ? "PASS: the assertion holds" : crashed ? "FAIL: the test crashed" : "FAIL: the assertion is false"]);
-    return { steps, passed };
-  }
-  function traceView(title, steps, passed) {
-    const box = el("div", "prog");
-    const h = el("h3", "", title); const s = el("span", "st " + (passed ? "pass" : "fail"), passed ? "PASS" : "FAIL"); s.style.visibility = "hidden"; h.append(s); box.append(h);
-    const tr = el("div", "trace");
-    steps.forEach(([k, v], i) => { const row = el("div", "tstep hidden"); row.append(el("div", "ix", String(i + 1)));
-      const b = el("div", "box"); b.append(el("em", "", k), document.createTextNode(v)); row.append(b); tr.append(row); });
-    box.append(tr); return { box, rows: [...tr.children], badge: s };
-  }
-  async function reveal(rows, badge, my) { for (const r of rows) { await wait(420); if (my !== gToken) return; r.classList.remove("hidden"); } if (badge) badge.style.visibility = "visible"; }
-  function statusOf(r, side) { return side === "correct" ? r.ref_status : r.bug_status; }
 
-  const STAGES = [
-    { t: "What goes in", d: () => "The tester gets two things: a short description of what the function should do, and the faulty function itself. The correct version exists, but it is locked away and only used later to score the tests.",
-      w: () => "A real developer never has the correct program, so the model must not see it either.",
-      v: (st) => { const p = P(); const r = el("div", "row2");
-        const a = el("div", "card"); a.append(el("h3", "", "Specification"), el("p", "spec", p.spec));
-        const b = el("div", "card"); b.append(el("h3", "", "Faulty function (the input code)")); const pre = el("pre", "code"); p.faulty.split("\n").forEach((l) => pre.append(el("span", "ln", l || " "))); b.append(pre);
-        r.append(a, b); st.append(r); const lk = el("div", "lockbox", "Correct function: hidden from the model. Used only by the evaluator to score each test."); st.append(lk); } },
-    { t: "The model writes 8 tests", d: () => `${TESTERS[state.tester]} reads the input and writes eight candidate tests. Each one is a single assertion: call the function with some input and state the output it expects from the correct program.`,
-      w: () => "Eight tries per problem give the model several chances; a problem counts as solved if any of the first eight tests reveals the bug.",
-      v: async (st, my) => { const box = el("div", "typed"); st.append(box); const f = focusCall();
-        for (const r of T().plain) { const d = el("div", r === f.test ? "focus" : "", ""); box.append(d); const txt = r.code ? `#${r.rank}  assert ${r.code}` : `#${r.rank}  (no readable test in this output)`;
-          if (reduce) { d.textContent = txt; continue; } for (let i = 0; i <= txt.length; i += 3) { if (my !== gToken) return; d.textContent = txt.slice(0, i); await wait(8); } d.textContent = txt; } } },
-    { t: "Anatomy of one test", d: () => { const f = focusCall(); return `Take test #${f.test.rank}. It has two parts: the input it tries, and the value it claims the correct program returns.`; },
-      w: () => "A useful test needs both: an input where the bug shows, and the right expected value.",
-      v: (st) => { const f = focusCall(); const a = splitAssert(f.test.code, f.call); const box = el("div", "anatomy");
-        const p1 = el("div", "part"); p1.append(el("small", "", "Input (function call)"), document.createTextNode(f.call));
-        const p2 = el("div", "op", a.op || "==");
-        const p3 = el("div", "part"); p3.append(el("small", "", "Expected value (model's guess)"), document.createTextNode(a.value));
-        box.append(p1, p2, p3); st.append(el("div", "lbl", "assert " + f.test.code), box); } },
-    { t: "Run it on the correct program", d: () => "The evaluator runs the test in a sandbox against the hidden correct function and checks the assertion.",
-      w: () => "If a test fails on the correct program, its expected value is wrong, so it cannot be trusted.",
-      v: (st, my) => { const f = focusCall(); const a = splitAssert(f.test.code, f.call); const r = f.test;
-        const { steps, passed } = traceSteps(f.call, a.value, a.op, r.ref_out, r.ref_status, "correct"); const tv = traceView("Correct program", steps, passed); st.append(tv.box); reveal(tv.rows, tv.badge, my); } },
-    { t: "Run it on the faulty program", d: () => "The same test runs against the faulty function.",
-      w: () => "A test reveals the bug only when it passes on the correct program AND fails on the faulty one.",
-      v: (st, my) => { const f = focusCall(); const a = splitAssert(f.test.code, f.call); const r = f.test;
-        const out = r.bug_out != null ? r.bug_out : (f.info ? f.info.faulty : null);
-        let status = r.bug_status; if (!status) status = out == null ? "error" : null;
-        const steps = [["Call the function", f.call], ["The faulty program returns", out == null ? "an error is raised" : String(out)]];
-        if (r.bug_status) steps.push(["Check the assertion", `${out} ${a.op || "=="} ${a.value}   →   ${r.bug_status === "pass" ? "true" : "false"}`]);
-        steps.push(["Result", r.bug_status ? (r.bug_status === "pass" ? "PASS" : "FAIL") : "Not scored here: the test already failed on the correct program"]);
-        const tv = traceView("Faulty program", steps, r.bug_status === "pass"); if (!r.bug_status) tv.badge.textContent = "SKIPPED", tv.badge.className = "st"; st.append(tv.box); reveal(tv.rows, tv.badge, my); } },
-    { t: "Why did it fail?", d: () => { const f = focusCall(); const c = f.test.category; return c === "valid_kill" ? "This test passed on the correct program and failed on the faulty one: it reveals the bug." :
-        c === "discriminating_wrong_oracle" ? "The input was good: the two programs really do behave differently on it. But the expected value was wrong, so the test failed even on the correct program." : "This test does not reveal the bug: " + (CATS[c] || [c])[0].toLowerCase() + "."; },
-      w: () => "This is the main failure we found: small models pick good inputs but guess the wrong value. Fine-tuning made it worse, not better.",
-      v: (st) => { const f = focusCall(); const r = f.test; const info = f.info || {};
-        const v = el("div", "bigverdict " + (r.valid_kill ? "good" : "bad")); v.append(el("b", "", (CATS[r.category] || [r.category])[0]));
-        v.append(document.createTextNode(`Correct program returns ${r.ref_out ?? info.correct ?? "?"}; faulty program returns ${r.bug_out ?? info.faulty ?? "?"}; the model expected ${splitAssert(r.code, f.call).value}.`)); st.append(v);
-        const row = el("div", "row2"); const a = el("div", "card"); a.append(el("div", "k lbl", "Input reveals the bug?"), el("div", "v", r.discriminating ? "yes: the outputs differ" : "no: both return the same"));
-        const b = el("div", "card"); b.append(el("div", "k lbl", "Expected value right?"), el("div", "v", r.ref_status === "pass" ? "yes" : "no")); row.append(a, b); st.append(row); } },
-    { t: "All eight tests", d: () => { const n = T().plain.filter((r) => r.valid_kill).length; return `Every test goes through the same two runs. For this problem ${n ? n + " of the 8 tests reveal the bug" : "none of the 8 tests reveals the bug"}.`; },
-      w: () => "Kill@8 asks: is there at least one bug-revealing test among the first eight?",
-      v: async (st, my) => { const box = el("div", "grid8"); st.append(box);
-        for (const r of T().plain) { await wait(150); if (my !== gToken) return; const row = el("div", "g8"); row.append(el("span", "rk", "#" + r.rank));
-          const c = el("code", "", r.code ? "assert " + r.code : "no test"); row.append(c, stChip(r.code ? r.ref_status : null), stChip(r.code ? r.bug_status : null), catPill(r.category)); box.append(row); }
-        const sl = el("div", "scoreline"); st.append(sl); scoreLine(sl, T().plain, false); } },
-    { t: "Voters write the function", d: () => "Now the fix. The same base model is asked eight times to write the function from the description alone. These are the voters. They never see the faulty code, the correct code or any test.",
-      w: () => "Writing code and running it is far more reliable for a small model than predicting an output in its head.",
-      v: async (st, my) => { const p = P(); const box = el("div", "voters tall"); st.append(box);
-        for (let i = 0; i < p.voters.length; i++) { await wait(160); if (my !== gToken) return; const b = el("button", "voter"); b.append(el("div", "vn", "Voter " + (i + 1)));
-          b.append(el("div", "minicode", (p.voters[i] || "no usable code").split("\n").slice(0, 6).join("\n"))); b.addEventListener("click", () => { showVoter(i); $("#voterCode").scrollIntoView({ behavior: "smooth" }); }); box.append(b); } } },
-    { t: "Voters run the same input", d: () => { const f = focusCall(); return `Each voter's function runs on the tester's input ${f.call}. The most common output becomes the expected value.`; },
-      w: () => "When all voters agree, the value is right about 9 times in 10 on our data.",
-      v: async (st, my) => { const f = focusCall(), p = P(), info = f.info; const box = el("div", "voters"); st.append(box);
-        const cards = p.voters.map((code, i) => { const b = el("div", "voter wait"); b.append(el("div", "vn", "Voter " + (i + 1))); const v = el("div", "vo", "…"); b.append(v); box.append(b); return { b, v, out: info ? info.voters[i] : null, code }; });
-        for (const c of cards) { await wait(260); if (my !== gToken) return; c.b.classList.remove("wait"); c.v.textContent = c.code == null ? "no code" : c.out == null ? "error" : c.out; }
-        await wait(300); if (my !== gToken || !info) return; cards.forEach((c) => { if (c.out != null && c.out === info.voted) c.b.classList.add("maj"); });
-        const bar = el("div", "bar"); st.append(bar); const counts = {}; info.voters.forEach((v) => { const k = v == null ? "error" : v; counts[k] = (counts[k] || 0) + 1; });
-        Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => { const d = el("div", "", n + " × " + k); d.style.width = (100 * n / info.voters.length) + "%"; d.style.background = k === info.voted ? "var(--accent)" : "var(--muted)"; bar.append(d); });
-        const v = el("div", "bigverdict neutral"); v.append(el("b", "", "Voted value: " + (info.voted ?? "no agreement")), document.createTextNode(`${info.votes} of ${info.voters.length} voters agree. The faulty program returns ${info.faulty ?? "an error"}, so ${info.voted != null && info.voted !== info.faulty ? "a test with this value should reveal the bug" : "this input cannot reveal the bug"}.`)); st.append(v); } },
-    { t: "The consensus test", d: () => "The voted value replaces the model's guess, giving a new test. It goes through exactly the same two runs.",
-      w: () => "Consensus never skips verification: a wrong vote would still fail on the correct program.",
-      v: (st, my) => { const f = focusCall(), r = f.cons; if (!r || !r.code) { st.append(el("div", "lockbox", "No consensus test for this tester.")); return; }
-        st.append(el("div", "lbl", "assert " + r.code)); const a = splitAssert(r.code, f.call); const row = el("div", "row2"); st.append(row);
-        const t1 = traceSteps(f.call, a.value, a.op, r.ref_out, r.ref_status, "correct"); const v1 = traceView("Correct program", t1.steps, t1.passed);
-        const t2 = traceSteps(f.call, a.value, a.op, r.bug_out, r.bug_status, "faulty"); const v2 = traceView("Faulty program", t2.steps, t2.passed);
-        row.append(v1.box, v2.box); (async () => { await reveal(v1.rows, v1.badge, my); await reveal(v2.rows, v2.badge, my); if (my !== gToken) return;
-          const v = el("div", "bigverdict " + (r.valid_kill ? "good" : "bad")); v.append(el("b", "", r.valid_kill ? "Bug revealed" : (CATS[r.category] || [r.category])[0]),
-            document.createTextNode(r.valid_kill ? "Passes on the correct program, fails on the faulty one." : "This consensus test does not reveal the bug.")); st.append(v); })(); } },
-    { t: "Rank and score", d: () => "Tests whose voted value differs from the faulty program's output move to the top. Compare the tester alone with the tester plus consensus.",
-      w: () => "Across all 593 external problems this lifts Kill@8 from 45% to 59% and Kill@1 from 19% to 50%, with no training.",
-      v: async (st, my) => { const row = el("div", "row2"); st.append(row);
-        const mk = (title, list) => { const c = el("div", ""); c.append(el("h3", "", title)); const b = el("div", "grid8"); c.append(b); const sl = el("div", "scoreline"); c.append(sl); row.append(c); return { b, sl, list }; };
-        const cols = [mk("Tester alone", T().plain), mk("With consensus", T().consensus)];
-        for (let k = 0; k < 8; k++) { await wait(140); if (my !== gToken) return; cols.forEach(({ b, list }) => { const r = list[k]; if (!r) return; const g = el("div", "g8"); g.style.gridTemplateColumns = "30px minmax(0,1fr) 150px"; g.append(el("span", "rk", "#" + r.rank), el("code", "", r.code ? "assert " + r.code : "no test"), catPill(r.category)); b.append(g); }); }
-        cols.forEach(({ sl, list }) => scoreLine(sl, list, false)); } },
-  ];
-  function renderGuide() {
-    const my = ++gToken, s = STAGES[g];
-    $("#gNum").textContent = `Stage ${g + 1} of ${STAGES.length}`; $("#gTitle").textContent = s.t; $("#gText").textContent = s.d(); $("#gWhy").textContent = s.w();
-    const st = $("#gStage"); st.innerHTML = ""; s.v(st, my);
-    const dots = $("#gDots"); dots.innerHTML = ""; STAGES.forEach((x, i) => { const b = el("button", i === g ? "cur" : i < g ? "done" : "", String(i + 1)); b.title = x.t; b.setAttribute("aria-label", "Stage " + (i + 1) + ": " + x.t); b.addEventListener("click", () => { stopAuto(); g = i; renderGuide(); }); dots.append(b); });
-    $("#gPrev").disabled = g === 0; $("#gNext").textContent = g === STAGES.length - 1 ? "Start over" : "Next";
+  const PYHELP = String.raw`
+import ast, json
+_CMP = {ast.Lt: ast.LtE, ast.LtE: ast.Lt, ast.Gt: ast.GtE, ast.GtE: ast.Gt, ast.Eq: ast.NotEq, ast.NotEq: ast.Eq}
+_BIN = {ast.Add: ast.Sub, ast.Sub: ast.Add, ast.Mult: ast.Add, ast.FloorDiv: ast.Mult, ast.Div: ast.Mult, ast.Mod: ast.FloorDiv}
+_SYM = {ast.Eq: "==", ast.NotEq: "!=", ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=", ast.Is: "is", ast.IsNot: "is not", ast.In: "in", ast.NotIn: "not in"}
+def _sites(tree):
+    out = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Compare):
+            for i, op in enumerate(node.ops):
+                if type(op) in _CMP: out.append(("comparison", node, i))
+        elif isinstance(node, ast.BinOp) and type(node.op) in _BIN: out.append(("arithmetic", node, None))
+        elif isinstance(node, ast.BoolOp): out.append(("logical", node, None))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, bool): out.append(("return value", node, None))
+        elif isinstance(node, ast.Constant) and type(node.value) is int: out.append(("boundary", node, None))
+    return out
+def mutants(src, limit=14):
+    base = ast.unparse(ast.parse(src)); res = []
+    for k in range(len(_sites(ast.parse(src)))):
+        t = ast.parse(src); kind, node, i = _sites(t)[k]
+        if kind == "comparison": node.ops[i] = _CMP[type(node.ops[i])]()
+        elif kind == "arithmetic": node.op = _BIN[type(node.op)]()
+        elif kind == "logical": node.op = ast.Or() if isinstance(node.op, ast.And) else ast.And()
+        elif kind == "return value": node.value = not node.value
+        else: node.value = node.value + 1
+        code = ast.unparse(t)
+        if code != base and all(r["code"] != code for r in res):
+            ch = [(x, y) for x, y in zip(base.splitlines(), code.splitlines()) if x != y]
+            res.append({"kind": kind, "code": code, "before": ch[0][0].strip() if ch else "", "after": ch[0][1].strip() if ch else ""})
+        if len(res) >= limit: break
+    return json.dumps({"base": base, "mutants": res})
+def run_tests(code, tests):
+    ns = {}
+    try: exec(code, ns)
+    except Exception as e: return json.dumps({"error": type(e).__name__ + ": " + str(e)})
+    out = []
+    for t in tests:
+        t = t.strip()
+        if not t: continue
+        if t.startswith("assert "): t = t[7:].strip()
+        r = {"test": t, "call": t, "op": "", "expected": "", "out": None, "status": None}
+        try: node = ast.parse(t, mode="eval").body
+        except SyntaxError:
+            r["status"] = "syntax"; out.append(r); continue
+        if isinstance(node, ast.Compare) and len(node.ops) == 1:
+            r["call"], r["op"], r["expected"] = ast.unparse(node.left), _SYM.get(type(node.ops[0]), "?"), ast.unparse(node.comparators[0])
+            try: r["out"] = repr(eval(r["call"], ns))
+            except Exception as e:
+                r["out"] = type(e).__name__; r["status"] = "error"; out.append(r); continue
+        try: r["status"] = "pass" if eval(t, ns) else "assertion_error"
+        except Exception as e:
+            r["status"] = "error"; r["out"] = r["out"] or type(e).__name__
+        out.append(r)
+    return json.dumps(out)
+`;
+  const WORKER = `importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js");
+const ready = loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/" }).then((py) => { py.runPython(self.HELP); return py; });
+onmessage = async (e) => { try { const py = await ready; py.globals.set("ARG1", e.data.a); py.globals.set("ARG2", py.toPy(e.data.b || []));
+  const r = py.runPython(e.data.fn === "mutants" ? "mutants(ARG1)" : "run_tests(ARG1, ARG2)"); postMessage({ id: e.data.id, ok: true, r }); }
+  catch (err) { postMessage({ id: e.data.id, ok: false, r: String(err) }); } };`;
+  let worker = null, wid = 0, pyReady = null; const pending = {};
+  function startWorker() {
+    try { worker = new Worker(URL.createObjectURL(new Blob([`self.HELP = ${JSON.stringify(PYHELP)};\n` + WORKER], { type: "text/javascript" }))); }
+    catch (e) { worker = null; return; }
+    worker.onmessage = (e) => { const p = pending[e.data.id]; if (p) { delete pending[e.data.id]; clearTimeout(p.t); p.res(e.data); } };
   }
-  function stopAuto() { if (gTimer) { clearInterval(gTimer); gTimer = null; $("#gAuto").textContent = "Autoplay"; } }
-  function initGuide() {
-    $("#gPrev").addEventListener("click", () => { stopAuto(); if (g > 0) { g--; renderGuide(); } });
-    $("#gNext").addEventListener("click", () => { stopAuto(); g = (g + 1) % STAGES.length; renderGuide(); });
-    $("#gAuto").addEventListener("click", () => { if (gTimer) return stopAuto(); $("#gAuto").textContent = "Pause"; gTimer = setInterval(() => { if (g === STAGES.length - 1) return stopAuto(); g++; renderGuide(); }, 6500); });
-    document.addEventListener("keydown", (e) => { if (e.target.closest("select, input, textarea")) return; const r = $("#guide").getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
-      if (e.key === "ArrowRight") { stopAuto(); if (g < STAGES.length - 1) { g++; renderGuide(); } } if (e.key === "ArrowLeft") { stopAuto(); if (g > 0) { g--; renderGuide(); } } });
+  function call(fn, a, b, timeout = 4000, first = false) {
+    return new Promise((res) => { if (!worker) return res({ ok: false, r: "The Python sandbox cannot start on this page. Open the public site to run code." });
+      const id = ++wid; const t = setTimeout(() => { delete pending[id]; worker.terminate(); startWorker(); pyReady = null;
+        res({ ok: false, r: first ? "Python did not load here. Open the public site to run code." : "Timed out after " + timeout / 1000 + " s (an infinite loop?). The sandbox was restarted." }); }, timeout);
+      pending[id] = { res, t }; worker.postMessage({ id, fn, a, b }); });
+  }
+  function setStatus(t, kind) { const s = $("#pyStatus"); s.innerHTML = ""; s.append(el("span", "dot " + (kind === "good" ? "good" : kind === "bad" ? "bad" : "acc")), document.createTextNode(t)); }
+  function ensurePy() {
+    if (pyReady) return pyReady;
+    if (!worker) startWorker();
+    setStatus("Loading Python in your browser…");
+    pyReady = call("mutants", "def f():\n    return 1\n", null, 45000, true).then((r) => { if (r.ok) { setStatus("Python ready", "good"); return true; } setStatus(r.r, "bad"); pyReady = null; return false; });
+    return pyReady;
+  }
+  let MUT = null, mutSel = -1;
+  async function genMutants() {
+    const box = $("#tMuts");
+    if (!(await ensurePy())) { box.innerHTML = ""; box.append(el("div", "status", "Python is not available on this page.")); return; }
+    const r = await call("mutants", $("#tCode").value, null, 6000); box.innerHTML = "";
+    if (!r.ok) { box.append(el("div", "status", r.r)); return; }
+    let parsed; try { parsed = JSON.parse(r.r); } catch (e) { box.append(el("div", "status", "Could not parse your code: " + r.r)); return; }
+    MUT = parsed; if (!MUT.mutants.length) { box.append(el("div", "status", "No mutation points found. Try code with comparisons, arithmetic or numbers.")); MUT = null; return; }
+    MUT.mutants.forEach((m, i) => { const b = el("button", "mut"); b.append(el("span", "tag", m.kind)); const cc = el("code"); cc.append(el("span", "part-ex", m.before), el("span", "part-op", "  →  "), el("span", "", m.after)); b.append(cc);
+      b.title = m.before + "  →  " + m.after; b.addEventListener("click", () => pickMut(i)); box.append(b); });
+    pickMut(0);
+  }
+  function pickMut(i) { mutSel = i; document.querySelectorAll("#tMuts .mut").forEach((b, k) => b.setAttribute("aria-pressed", String(k === i))); $("#tMutInfo").textContent = "bug " + (i + 1) + ": " + MUT.mutants[i].kind; }
+  const tests = () => $("#tTests").value.split("\n").map((s) => s.trim()).filter(Boolean);
+  function showMsg(box, title, sub) { const b = banner("bad", "!", title, sub); box.append(b); b.classList.remove("pend"); }
+  async function runTry() {
+    const out = $("#tOut"); out.innerHTML = "";
+    if (!MUT) await genMutants(); if (!MUT || mutSel < 0) return;
+    const a = await call("run", MUT.base, tests()), b = await call("run", MUT.mutants[mutSel].code, tests());
+    if (!a.ok || !b.ok) return showMsg(out, "Could not run", a.ok ? b.r : a.r);
+    const ra = JSON.parse(a.r), rb = JSON.parse(b.r);
+    if (ra.error || rb.error) return showMsg(out, "The code did not run", ra.error || rb.error);
+    const my = ++tok;
+    for (let i = 0; i < ra.length; i++) {
+      const x = ra[i], y = rb[i]; const wrap = el("div", "card"); wrap.append(el("h3", "mono", "assert " + x.test)); const run = el("div", "runner"); wrap.append(run); out.append(wrap);
+      if (x.status === "syntax") { run.append(el("div", "status", "This line is not a valid Python expression.")); continue; }
+      const l1 = lane({ label: "Correct", kind: "good", call: x.call, out: x.out, op: x.op, exp: x.expected, status: x.status });
+      const l2 = lane({ label: "Faulty", kind: "bad", call: y.call, out: y.out, op: y.op, exp: y.expected, status: y.status });
+      run.append(l1.L, l2.L);
+      const kill = x.status === "pass" && y.status !== "pass";
+      const bn = kill ? banner("good", "✓", "Bug revealed", "Passes on the correct program, fails on the faulty one.")
+        : x.status !== "pass" ? banner("bad", "✗", "Wrong expected value", "This test fails even on the correct program.") : banner("neutral", "–", "Bug not revealed", "Both programs pass this test.");
+      wrap.append(bn); await playLane(l1, my); if (my !== tok) return; await playLane(l2, my); if (my !== tok) return; bn.classList.remove("pend");
+    }
+  }
+  async function checkAll() {
+    const box = $("#tKill"); box.innerHTML = "";
+    if (!MUT) await genMutants(); if (!MUT) return;
+    const ts = tests(); const base = await call("run", MUT.base, ts); if (!base.ok) return showMsg(box, "Could not run", base.r);
+    const rb = JSON.parse(base.r); if (rb.error) return showMsg(box, "The code did not run", rb.error);
+    const res = []; for (const m of MUT.mutants) { const r = await call("run", m.code, ts); res.push(r.ok ? JSON.parse(r.r) : null); }
+    const tbl = el("table"); const hr = el("tr"); hr.append(el("th", "", "test  /  bug")); MUT.mutants.forEach((m, i) => { const th = el("th", "", "B" + (i + 1)); th.title = m.kind + ": " + m.before + " → " + m.after; hr.append(th); }); tbl.append(hr);
+    const killed = new Set();
+    rb.forEach((x, ti) => { const tr = el("tr"); const td0 = el("th", "", x.test.length > 34 ? x.test.slice(0, 33) + "…" : x.test); td0.title = x.test; td0.style.textAlign = "left"; tr.append(td0);
+      res.forEach((r, mi) => { const y = Array.isArray(r) ? r[ti] : null; const k = x.status === "pass" && y && y.status !== "pass"; if (k) killed.add(mi);
+        const td = el("td", k ? "k" : "s", k ? "✓" : x.status !== "pass" ? "×" : "·"); td.title = k ? "reveals this bug" : x.status !== "pass" ? "wrong expected value" : "does not reveal it"; tr.append(td); }); tbl.append(tr); });
+    const h = el("div", "kpis"); const k = el("div", "kpi"); k.append(el("span", "dot good"), el("span", "", "bugs your tests reveal"), el("b", "", killed.size + " / " + MUT.mutants.length)); h.append(k);
+    const lg = el("div", "kpi"); lg.append(el("span", "", "✓ reveals · · misses · × wrong expected value")); h.append(lg);
+    box.append(h, tbl);
+  }
+  function bootTry() {
+    $("#tCode").value = "def count_in_range(nums, lo, hi):\n    \"\"\"Count how many numbers lie between lo and hi, inclusive.\"\"\"\n    count = 0\n    for x in nums:\n        if lo <= x and x <= hi:\n            count += 1\n    return count\n";
+    $("#tTests").value = "count_in_range([1, 5, 9], 2, 8) == 1\ncount_in_range([2, 4, 6], 2, 6) == 3\ncount_in_range([3, 4], 4, 4) == 2\ncount_in_range([], 0, 10) == 0\n";
+    $("#tMut").addEventListener("click", genMutants); $("#tRun").addEventListener("click", runTry); $("#tAll").addEventListener("click", checkAll);
+    $("#tCode").addEventListener("input", () => { MUT = null; mutSel = -1; });
+    $("#tCode").addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); const t = e.target, s = t.selectionStart; t.setRangeText("    ", s, t.selectionEnd, "end"); } });
   }
 
-  const mq = window.matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", () => D && renderResults());
+  function show(v) { document.querySelectorAll("[data-view]").forEach((s) => (s.hidden = s.dataset.view !== v)); document.querySelectorAll(".views button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.go === v)));
+    if (v === "results") renderResults(); if (v === "try") ensurePy(); if (location.hash.slice(1) !== v) history.replaceState(null, "", "#" + v); }
+  document.querySelectorAll(".views button").forEach((b) => b.addEventListener("click", () => show(b.dataset.go)));
+  addEventListener("hashchange", () => { const h = location.hash.slice(1); if (["explore", "try", "results"].includes(h)) show(h); });
+  const mq = matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", () => { if (!$('[data-view="results"]').hidden) renderResults(); });
 
+  function boot(data) { D = data; bootExplore(); bootTry(); const h = location.hash.slice(1); show(["explore", "try", "results"].includes(h) ? h : "explore"); }
   if (window.ONEIROS_DATA) boot(window.ONEIROS_DATA);
-  else fetch("data.json").then((r) => r.json()).then(boot).catch(() => { $("#spec").textContent = "Could not load data.json. Serve this folder over http (for example: python -m http.server) and reload."; });
+  else fetch("data.json").then((r) => r.json()).then(boot).catch(() => { $("#canvas").textContent = "Could not load data.json. Serve this folder over http and reload."; });
 })();
 </script>
 
