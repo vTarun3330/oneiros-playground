@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Oneiros Playground</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23D46A0C'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -480,7 +481,7 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
     $("#bPrev").addEventListener("click", () => { stopAuto(); go(S.stage - 1); });
     $("#bNext").addEventListener("click", () => { stopAuto(); go(S.stage === STAGES.length - 1 ? 0 : S.stage + 1); });
     $("#bPlay").addEventListener("click", () => (auto ? stopAuto() : startAuto()));
-    document.addEventListener("keydown", (e) => { if ($('[data-view="explore"]').hidden || e.target.closest("input, textarea, select")) return;
+    document.addEventListener("keydown", (e) => { const tg = e.target; if ($('[data-view="explore"]').hidden || (tg && tg.closest && tg.closest("input, textarea, select"))) return;
       if (e.key === "ArrowRight") { stopAuto(); go(S.stage + 1); } if (e.key === "ArrowLeft") { stopAuto(); go(S.stage - 1); } });
     fillProblems();
   }
@@ -518,7 +519,9 @@ def _sites(tree):
         elif isinstance(node, ast.Constant) and type(node.value) is int: out.append(("boundary", node, None))
     return out
 def mutants(src, limit=14):
-    base = ast.unparse(ast.parse(src)); res = []
+    try: base = ast.unparse(ast.parse(src))
+    except SyntaxError as e: return json.dumps({"error": "line %s: %s" % (e.lineno, e.msg)})
+    res = []
     for k in range(len(_sites(ast.parse(src)))):
         t = ast.parse(src); kind, node, i = _sites(t)[k]
         if kind == "comparison": node.ops[i] = _CMP[type(node.ops[i])]()
@@ -584,10 +587,12 @@ onmessage = async (e) => { try { const py = await ready; py.globals.set("ARG1", 
   let MUT = null, mutSel = -1;
   async function genMutants() {
     const box = $("#tMuts");
+    MUT = null; mutSel = -1; $("#tMutInfo").textContent = "pick a bug"; box.innerHTML = ""; box.append(el("div", "status", "Generating bugs…"));
     if (!(await ensurePy())) { box.innerHTML = ""; box.append(el("div", "status", "Python is not available on this page.")); return; }
     const r = await call("mutants", $("#tCode").value, null, 6000); box.innerHTML = "";
     if (!r.ok) { box.append(el("div", "status", r.r)); return; }
-    let parsed; try { parsed = JSON.parse(r.r); } catch (e) { box.append(el("div", "status", "Could not parse your code: " + r.r)); return; }
+    let parsed; try { parsed = JSON.parse(r.r); } catch (e) { box.append(el("div", "status", "Could not read your code.")); return; }
+    if (parsed.error) { box.append(el("div", "status", "Your code has a syntax error (" + parsed.error + "). Fix it and generate bugs again.")); return; }
     MUT = parsed; if (!MUT.mutants.length) { box.append(el("div", "status", "No mutation points found. Try code with comparisons, arithmetic or numbers.")); MUT = null; return; }
     MUT.mutants.forEach((m, i) => { const b = el("button", "mut"); b.append(el("span", "tag", m.kind)); const cc = el("code"); cc.append(el("span", "part-ex", m.before), el("span", "part-op", "  →  "), el("span", "", m.after)); b.append(cc);
       b.title = m.before + "  →  " + m.after; b.addEventListener("click", () => pickMut(i)); box.append(b); });
