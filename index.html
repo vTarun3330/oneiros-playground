@@ -6,24 +6,35 @@
 <title>Oneiros Playground</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: dark lab look (one gold accent, violet secondary, hairline rules). Hero with pickers, guided walkthrough as the main view, collapsible full view, results, method. */
+/* Layout: hero with pickers, guided walkthrough as the main view, collapsible full view, results, method. Colour = meaning: green correct program, red faulty program, orange voters/consensus (deck orange). */
 :root {
-  --bg: #100E19; --surface: #191626; --card-a: #221A30; --card-b: #191523; --sunk: #130F1D; --ink: #F5EFFB; --muted: #BCB2CA; --dim: #A39AB5;
-  --line: #383044; --border: #4B3D58; --accent: #FFCE8D; --accent-soft: #2E2433; --accent-ink: #FFE1B6; --violet: #BBABFF;
-  --sel: #35284A; --sel-line: #625079;
-  --good: #8FE0AD; --good-soft: #1B3127; --bad: #FF9D8F; --bad-soft: #3A1F27; --warn: #F2C879; --warn-soft: #33291F;
-  --neutral-soft: #241E31; --code-bg: #14111D;
-  --font-display: "Bricolage Grotesque", Inter, system-ui, sans-serif; --font-body: Inter, system-ui, "Segoe UI", sans-serif;
-  --font-serif: "Instrument Serif", Georgia, serif; --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-  color-scheme: dark;
+  --bg: #F6F7F9; --surface: #FFFFFF; --card-a: #FFFFFF; --card-b: #FAFBFC; --sunk: #EEF1F4; --ink: #17202B; --muted: #4C5664; --dim: #6A7381;
+  --line: #DDE2E7; --border: #CDD3DA; --accent: #D46A0C; --accent-soft: #FDEBD8; --accent-ink: #8C4404; --cool: #2E5C8A;
+  --sel: #FDEBD8; --sel-line: #D46A0C; --shadow: 0 10px 30px rgba(23, 32, 43, .07);
+  --good: #1F7A4D; --good-soft: #DDF1E5; --bad: #BF3A2B; --bad-soft: #FBE4E0; --warn: #956000; --warn-soft: #FBEFD5;
+  --neutral-soft: #EBEEF1; --code-bg: #F3F5F8;
+  --font-display: Manrope, Inter, system-ui, sans-serif; --font-body: Inter, system-ui, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161C; --surface: #1A1F27; --card-a: #1D232C; --card-b: #1A1F27; --sunk: #151A21; --ink: #E8EBEF; --muted: #AAB2BE; --dim: #8C95A3;
+  --line: #2C333E; --border: #3A4250; --accent: #F0913A; --accent-soft: #3A2716; --accent-ink: #F8C590; --cool: #82AAD6;
+  --sel: #3A2716; --sel-line: #F0913A; --shadow: 0 12px 34px rgba(0, 0, 0, .35);
+  --good: #6FD39C; --good-soft: #183326; --bad: #F28B7E; --bad-soft: #3B1F1C; --warn: #E8B85C; --warn-soft: #352B1A;
+  --neutral-soft: #242B35; --code-bg: #151A21; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #12161C; --surface: #1A1F27; --card-a: #1D232C; --card-b: #1A1F27; --sunk: #151A21; --ink: #E8EBEF; --muted: #AAB2BE; --dim: #8C95A3;
+  --line: #2C333E; --border: #3A4250; --accent: #F0913A; --accent-soft: #3A2716; --accent-ink: #F8C590; --cool: #82AAD6;
+  --sel: #3A2716; --sel-line: #F0913A; --shadow: 0 12px 34px rgba(0, 0, 0, .35);
+  --good: #6FD39C; --good-soft: #183326; --bad: #F28B7E; --bad-soft: #3B1F1C; --warn: #E8B85C; --warn-soft: #352B1A;
+  --neutral-soft: #242B35; --code-bg: #151A21; color-scheme: dark; }
 * { box-sizing: border-box; }
 html { background: var(--bg); }
-body { min-height: 100vh; background: radial-gradient(1200px 520px at 50% -120px, #21182E, transparent 70%), var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+body { min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
 h1, h2, h3, .brand { font-family: var(--font-display); }
-em.gold { font-family: var(--font-serif); font-style: italic; color: var(--accent); font-weight: 400; }
+em.gold { font-style: normal; color: var(--accent); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
 .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 nav.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line); }
@@ -202,64 +213,63 @@ footer { padding-block: 26px 40px; color: var(--muted); font-size: 13px; }
   .trow .catcell { grid-column: 2 / -1; justify-self: start; }
   .trow.head .catcell { display: none; }
 }
-/* ---- lab look (after base rules so it wins) ---- */
-nav.top { background: rgba(16, 14, 25, .86); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-body::before { background: var(--bg); }
-.brand { font-weight: 750; letter-spacing: -.02em; font-size: 18px; }
+/* ---- Oneiros look (after base rules so it wins) ---- */
+nav.top { background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+body::before { background: var(--surface); }
+.brand { font-weight: 800; letter-spacing: -.02em; font-size: 18px; }
 .brand span { color: var(--accent); }
-nav.top a { color: var(--dim); font-size: 13.5px; }
-nav.top a:hover { color: var(--ink); }
-.wrap { max-width: 1240px; }
-header.hero { padding-block: 46px 10px; }
-h1 { font-size: clamp(34px, 5vw, 62px); font-weight: 650; letter-spacing: -.05em; line-height: 1.02; }
-h2 { font-size: clamp(19px, 1.9vw, 24px); font-weight: 650; letter-spacing: -.02em; }
-.lead { color: var(--muted); font-size: 16.5px; margin-top: 14px; }
-.eyebrow, .lbl, .field label, .stage-n, .num, .tag, .k { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .13em; font-size: 11px; }
-.eyebrow { color: var(--accent); }
-.pickers { background: linear-gradient(147deg, var(--card-a), var(--card-b) 76%); border: 1px solid var(--border); border-radius: 14px;
-  box-shadow: 0 17px 44px #08060E5C, inset 0 1px #FFFFFF0D; margin-top: 28px; padding: 18px; }
-.seg { background: var(--sunk); border: 1px solid #42354F; border-radius: 8px; padding: 3px; gap: 3px; }
-.seg button { background: transparent; border: 1px solid transparent; border-radius: 5px; color: var(--muted); padding: 6px 12px; font-size: 13.5px; }
+nav.top a { color: var(--muted); font-size: 13.5px; font-weight: 500; }
+nav.top a:hover { color: var(--accent-ink); }
+.wrap { max-width: 1200px; }
+header.hero { padding-block: 40px 8px; }
+h1 { font-size: clamp(32px, 4.6vw, 54px); font-weight: 800; letter-spacing: -.035em; line-height: 1.05; }
+h2 { font-size: clamp(19px, 1.8vw, 23px); font-weight: 700; letter-spacing: -.015em; }
+.lead { color: var(--muted); font-size: 16px; margin-top: 12px; }
+.eyebrow, .lbl, .field label, .stage-n, .num, .tag, .k { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; }
+.eyebrow { color: var(--accent-ink); }
+.pickers { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); margin-top: 24px; padding: 18px; }
+.seg { background: var(--sunk); border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 3px; }
+.seg button { background: transparent; border: 1px solid transparent; border-radius: 6px; color: var(--muted); padding: 6px 12px; font-size: 13.5px; font-weight: 500; }
 .seg button:hover { color: var(--ink); }
-.seg button[aria-pressed="true"] { background: var(--sel); border-color: var(--sel-line); color: #F3E9FF; }
-select { background: #1A1424; border: 1px solid #5A4868; border-radius: 7px; min-height: 41px; color: var(--ink); }
-.btn { background: var(--accent); border-color: var(--accent); color: #251925; border-radius: 7px; min-height: 40px; }
-.btn:hover:not(:disabled) { background: #FFE1B6; }
-.btn.ghost { background: #20192E; border: 1px solid #4F405E; color: var(--ink); border-radius: 6px; }
-.btn.ghost:hover:not(:disabled) { border-color: var(--violet); background: #302240; }
+.seg button[aria-pressed="true"] { background: var(--surface); border-color: var(--border); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; min-height: 40px; color: var(--ink); }
+.btn { background: var(--accent); border-color: var(--accent); color: #FFFFFF; border-radius: 8px; min-height: 38px; }
+.btn:hover:not(:disabled) { filter: brightness(1.06); }
+.btn.ghost { background: var(--surface); border: 1px solid var(--border); color: var(--ink); }
+.btn.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent-ink); }
 button:focus-visible, select:focus-visible, .step:focus-visible, .voter:focus-visible, .chip:focus-visible, .dots button:focus-visible { outline: 2px solid var(--accent); }
-.guide { background: linear-gradient(147deg, var(--card-a), var(--card-b) 76%); border: 1px solid var(--border); border-radius: 16px;
-  box-shadow: 0 24px 56px #08060E63, inset 0 1px #FFFFFF0D; }
-.narr { background: rgba(19, 15, 29, .55); border-right: 1px solid var(--line); }
-.narr h2 { font-size: clamp(20px, 2vw, 26px); }
-.narr .why { border-left-color: var(--violet); color: var(--muted); }
-.dots button { background: var(--sunk); border-color: #42354F; color: var(--dim); }
-.dots button.done { background: #2A2136; color: var(--accent-ink); }
-.dots button.cur { background: #382839; border-color: #A7755F; color: #FFE5C5; }
-.card, .prog, .lockbox, .anatomy .part, .typed div, .g8, .trow, .voter, .chip, .tstep .box { background: rgba(255, 255, 255, .02); border-color: var(--line); }
-.card { border-radius: 12px; }
-.typed div.focus, .voter.maj, .chip[aria-pressed="true"] { background: #2E2433; border-color: #A7755F; color: #FFE5C5; }
+.guide { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+.narr { background: var(--sunk); border-right: 1px solid var(--line); }
+.narr h2 { font-size: clamp(20px, 2vw, 25px); }
+.narr .why { border-left-color: var(--accent); color: var(--muted); }
+.dots button { background: var(--surface); border-color: var(--line); color: var(--dim); }
+.dots button.done { background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
+.dots button.cur { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
+.card, .prog, .lockbox, .anatomy .part, .typed div, .g8, .trow, .voter, .chip, .tstep .box { background: var(--surface); border-color: var(--line); }
+.card { border-radius: 10px; }
+.typed div.focus, .voter.maj, .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.prog:first-child h3 { color: var(--good); }
 pre.code { background: var(--code-bg); border-color: var(--line); }
-.tag { background: var(--neutral-soft); color: var(--dim); font-size: 10.5px; }
-.tag.accent { background: #2E2433; color: var(--accent); }
+.tag { background: var(--neutral-soft); color: var(--muted); font-size: 10.5px; }
+.tag.accent { background: var(--accent-soft); color: var(--accent-ink); }
 .st { background: var(--neutral-soft); color: var(--dim); }
-.pill { background: var(--neutral-soft); color: var(--muted); font-weight: 500; }
-.bar div { color: #140F1C; font-weight: 500; }
+.pill { background: var(--neutral-soft); color: var(--muted); font-weight: 600; }
+.bar div { color: #FFFFFF; font-weight: 600; }
 .score { background: var(--sunk); border: 1px solid var(--line); }
-.bigverdict.neutral { background: #241D30; }
-.step { background: var(--sunk); border-color: #42354F; color: var(--muted); }
+.bigverdict.neutral { background: var(--accent-soft); color: var(--ink); }
+.step { background: var(--surface); border-color: var(--line); color: var(--muted); }
 .step b { color: var(--dim); }
-.step.on { background: #382839; border-color: #A7755F; color: #FFE5C5; }
-.step.on b { color: var(--accent); }
-section.scene { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 34px 0 6px; margin-top: 18px; }
+.step.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.step.on b { color: var(--accent-ink); }
+section.scene { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 32px 0 6px; margin-top: 18px; }
 section.scene.focus { box-shadow: none; }
 section.scene.focus .scene-head h2 { color: var(--accent-ink); }
-details.full { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; }
+details.full { margin-top: 38px; border-top: 1px solid var(--line); padding-top: 22px; }
 details.full > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 details.full > summary::-webkit-details-marker { display: none; }
 details.full > summary h2::after { content: " +"; color: var(--accent); }
 details.full[open] > summary h2::after { content: " −"; }
-.next { border-color: var(--border); color: var(--muted); }
+.next { border-color: var(--border); color: var(--muted); background: var(--surface); }
 footer { color: var(--dim); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -616,14 +626,14 @@ footer { color: var(--dim); }
     const css = getComputedStyle(document.documentElement), c = (n) => css.getPropertyValue(n).trim();
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kill@8 and Kill@1 by system">`;
     [0, 25, 50, 75, 100].forEach((t) => { s += `<line x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 24}" stroke="${c("--line")}" />` +
-      `<text x="${x(t)}" y="${H - 8}" fill="${c("--muted")}" font-size="12" text-anchor="middle" font-family="IBM Plex Mono, monospace">${t}%</text>`; });
+      `<text x="${x(t)}" y="${H - 8}" fill="${c("--muted")}" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">${t}%</text>`; });
     rows.forEach((r, i) => {
       const y = top + i * rowH, cons = /consensus/.test(r.system);
-      s += `<text x="${left - 10}" y="${y + 20}" fill="${c("--ink")}" font-size="13" text-anchor="end" font-weight="${cons ? 600 : 400}" font-family="IBM Plex Sans, sans-serif">${r.system}</text>`;
+      s += `<text x="${left - 10}" y="${y + 20}" fill="${c("--ink")}" font-size="13" text-anchor="end" font-weight="${cons ? 600 : 400}" font-family="Inter, sans-serif">${r.system}</text>`;
       s += `<rect x="${x(0)}" y="${y + 6}" width="${x(r.kill8) - x(0)}" height="16" rx="3" fill="${c("--accent")}" opacity="${cons ? 1 : .55}" />`;
-      s += `<text x="${x(r.kill8) + 6}" y="${y + 19}" fill="${c("--ink")}" font-size="12" font-family="IBM Plex Mono, monospace">${r.kill8}</text>`;
+      s += `<text x="${x(r.kill8) + 6}" y="${y + 19}" fill="${c("--ink")}" font-size="12" font-family="JetBrains Mono, monospace">${r.kill8}</text>`;
       s += `<rect x="${x(0)}" y="${y + 25}" width="${x(r.kill1) - x(0)}" height="9" rx="2" fill="${c("--ink")}" opacity="${cons ? .9 : .45}" />`;
-      s += `<text x="${x(r.kill1) + 6}" y="${y + 34}" fill="${c("--muted")}" font-size="11" font-family="IBM Plex Mono, monospace">${r.kill1}</text>`;
+      s += `<text x="${x(r.kill1) + 6}" y="${y + 34}" fill="${c("--muted")}" font-size="11" font-family="JetBrains Mono, monospace">${r.kill1}</text>`;
     });
     $("#chart").innerHTML = s + "</svg>";
   }
