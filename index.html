@@ -300,7 +300,7 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
     const nO = el("div", "node pend"); nO.append(el("small", "", "returns"), el("div", "v", outTxt));
     const nA = el("div", "node pend"); nA.append(el("small", "", "assertion"));
     const av = el("div", "v"); av.append(el("span", "", outTxt + " "), el("span", "part-op", (o.op || "==") + " "), el("span", "part-ex", o.exp)); nA.append(av);
-    const s = o.status, skip = !s;
+    const s = ["pass", "assertion_error", "error", "timeout"].includes(o.status) ? o.status : null, skip = !s;  // "unknown" = not scored
     const vd = el("div", "verdict pend " + (skip ? "skip" : s === "pass" ? "pass" : "fail"), skip ? "not run" : s === "pass" ? "✓ PASS" : s === "assertion_error" ? "✗ FAIL" : "✗ " + (s === "timeout" ? "TIMEOUT" : "ERROR"));
     if (skip && o.note) vd.title = o.note;
     const ls = [el("div", "link"), el("div", "link"), el("div", "link")];
@@ -325,7 +325,8 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
   function focus() {
     const t = T(); const cons = t.consensus.find((r) => r.valid_kill) || t.consensus[0];
     const call = callOf(cons && cons.code);
-    const test = t.plain.find((r) => r.code && callOf(r.code) === call && r.category === "discriminating_wrong_oracle") || t.plain.find((r) => r.code && callOf(r.code) === call) || t.plain.find((r) => r.code);
+    const ok = (r) => r.code && !r.partial;
+    const test = t.plain.find((r) => ok(r) && callOf(r.code) === call && r.category === "discriminating_wrong_oracle") || t.plain.find((r) => ok(r) && callOf(r.code) === call) || t.plain.find(ok);
     return { cons, call, test };
   }
 
@@ -365,8 +366,9 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
       const cc = el("div", "c");
       if (r.code) { const s = splitTest(r.code); cc.append(el("span", "part-in", s.call)); const e = el("span"); e.append(el("span", "part-op", s.op + " "), el("span", "part-ex", s.exp)); cc.append(e); }
       else cc.append(el("span", "part-op", "no readable test"));
-      b.append(cc); if (r === f.test) b.style.borderColor = "var(--accent)";
-      b.addEventListener("click", () => { if (!r.code) return; S.test = r.rank; stopAuto(); go(2); }); deck.append(b); return b; });
+      b.append(cc); if (r.partial) { b.append(el("div", "n", "last line of a longer test")); b.style.cursor = "default"; }
+      if (r === f.test) b.style.borderColor = "var(--accent)";
+      b.addEventListener("click", () => { if (!r.code || r.partial) return; S.test = r.rank; stopAuto(); go(2); }); deck.append(b); return b; });
     const leg = el("div", "kpis"); [["inp", "input (function call)"], ["acc", "expected value (the model's guess)"]].forEach(([d, t]) => { const k = el("div", "kpi"); k.append(el("span", "dot " + d), el("span", "", t)); leg.append(k); }); c.append(leg);
     for (const b of cards) { await sleep(110); if (my !== tok) return; b.classList.remove("out"); }
   }
@@ -380,14 +382,18 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
     return { s, call, info, go: async (bn) => { await playLane(l1, my); if (my !== tok) return; await sleep(200); await playLane(l2, my); if (my !== tok) return; await sleep(250); bn.classList.remove("pend"); } };
   }
   async function stExec(c, my) {
-    const t = T(), f = focus(); const tests = t.plain.filter((r) => r.code);
+    const t = T(), f = focus(); const tests = t.plain.filter((r) => r.code && !r.partial);
     const r = tests.find((x) => x.rank === S.test) || f.test; S.test = r.rank;
     const tabs = el("div", "testtabs"); tests.forEach((x) => { const b = el("button", "", "#" + x.rank); b.prepend(el("span", "dot " + (x.valid_kill ? "good" : x.ref_status === "pass" ? "inp" : "bad")));
       b.setAttribute("aria-pressed", String(x === r)); b.addEventListener("click", () => { S.test = x.rank; stopAuto(); go(2); }); tabs.append(b); }); c.append(tabs);
     const pr = await runPair(c, my, r, "test");
     const [lab, kind] = CAT[r.category] || [r.category, "n"];
-    const why = r.category === "valid_kill" ? "Passes on the correct program, fails on the faulty one." : r.category === "discriminating_wrong_oracle"
-      ? `Good input, wrong value: the correct program returns ${r.ref_out ?? pr.info.correct}, not ${pr.s.exp}.` : r.category === "non_discriminating_input" ? "Both programs return the same value on this input." : "This test does not reveal the bug.";
+    const WHY = { valid_kill: "Passes on the correct program, fails on the faulty one.", non_discriminating_input: "Both programs return the same value on this input.",
+      duplicate: "The same test as an earlier one, so it is not counted again.", execution_failure: "The test did not run to its assertion on the correct program.",
+      valid_non_kill: "It passes on both programs: the check is too weak to catch the bug.", correct_content_invalid_contract: "Right input and value, but the test breaks the format rules.",
+      parse_failure: "No runnable test could be read from the model's output." };
+    const why = r.category === "discriminating_wrong_oracle" ? `Good input, wrong value: the correct program returns ${r.ref_out ?? pr.info.correct}, not ${pr.s.exp}.`
+      : WHY[r.category] || "This test does not reveal the bug.";
     const bn = banner(kind === "good" ? "good" : kind === "bad" ? "bad" : "neutral", kind === "good" ? "✓" : "✗", lab, why); c.append(bn);
     pr.go(bn);
   }
@@ -395,8 +401,8 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
     const t = T(); const m = el("div", "matrix"); c.append(m);
     const h = el("div", "mrow head"); ["", "test", "correct", "faulty", "outcome"].forEach((x) => h.append(el("span", "", x))); m.append(h);
     const rows = t.plain.map((r) => { const row = el("div", "mrow pend"); row.append(el("span", "lab", "#" + r.rank));
-      row.append(el("code", "", r.code ? r.code : "no readable test"));
-      [r.ref_status, r.bug_status].forEach((st) => { const [k, sym] = markFor(r.code ? st : null); const mk = el("span", "mark " + k, sym); mk.title = st || "not run"; row.append(mk); });
+      row.append(el("code", "", r.code ? r.code + (r.partial ? "   (last line of a longer test)" : "") : "no readable test"));
+      [r.ref_status, r.bug_status].forEach((st) => { const [k, sym] = markFor(r.code ? st : null); const mk = el("span", "mark " + k, sym); mk.title = st && st !== "unknown" ? st : "not run"; row.append(mk); });
       const [lab, kind] = CAT[r.category] || [r.category, "n"]; row.append(el("span", "vtag " + kind, lab)); m.append(row); return row; });
     const k = el("div", "kpis"); c.append(k);
     for (const row of rows) { await sleep(120); if (my !== tok) return; row.classList.remove("pend"); }
@@ -428,8 +434,12 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
     await sleep(600); if (my !== tok) return;
     const rev = info.voted != null && info.voted !== info.faulty, right = info.voted === info.correct;
     [["dot acc", "voted", info.voted ?? "none"], ["dot bad", "faulty returns", info.faulty ?? "error"], ["dot good", "correct returns", info.correct ?? "error"]].forEach(([d, k, v]) => { const x = el("div", "kpi"); x.append(el("span", d), el("span", "", k), el("b", "mono", v)); res.append(x); });
-    const b = banner(rev && right ? "good" : "bad", rev && right ? "✓" : "✗", rev ? (right ? "The vote differs from the faulty output, and it is right" : "The vote differs from the faulty output, but it is wrong") : "The vote matches the faulty output",
-      rev ? "A test with this value should reveal the bug." : "This input cannot reveal the bug."); c.insertBefore(b, drawer); requestAnimationFrame(() => b.classList.remove("pend"));
+    const same = info.correct != null && info.correct === info.faulty;
+    const [bt, bs] = rev ? (right ? ["The vote differs from the faulty output, and it is right", "A test with this value reveals the bug."]
+        : ["The vote differs from the faulty output, but it is wrong", "A test with this value would fail on the correct program too."])
+      : same ? ["The vote matches the faulty output", "Both programs return the same value here, so this input cannot reveal the bug."]
+        : ["The vote matches the faulty output, but the correct value differs", "The voters made the same mistake as the bug, so this input is not flagged."];
+    const b = banner(rev && right ? "good" : "bad", rev && right ? "✓" : "✗", bt, bs); c.insertBefore(b, drawer); requestAnimationFrame(() => b.classList.remove("pend"));
   }
   function showVoter(i, drawer) { const p = P(); drawer.hidden = false; drawer.innerHTML = ""; const h = el("div", "stage-head"); h.style.padding = "0 0 8px"; h.style.border = "0";
     h.append(el("h3", "", "Voter " + (i + 1) + " · written from the specification only")); const x = el("button", "btn ghost", "Close"); x.addEventListener("click", () => (drawer.hidden = true)); h.append(x);
@@ -448,7 +458,7 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
     const cmp = el("div", "cmp"); c.append(cmp);
     const col = (title, list) => { const w = el("div"); const h = el("h3", "", title); h.style.marginBottom = "8px"; w.append(h); const m = el("div", "matrix"); w.append(m);
       const rows = list.map((r) => { const row = el("div", "mrow pend"); row.style.gridTemplateColumns = "28px minmax(0,1fr) auto"; row.append(el("span", "lab", "#" + r.rank));
-        row.append(el("code", "", r.code || "no readable test")); const [lab, kind] = CAT[r.category] || [r.category, "n"]; row.append(el("span", "vtag " + kind, lab)); m.append(row); return row; });
+        row.append(el("code", "", r.code ? r.code + (r.partial ? "   (last line of a longer test)" : "") : "no readable test")); const [lab, kind] = CAT[r.category] || [r.category, "n"]; row.append(el("span", "vtag " + kind, lab)); m.append(row); return row; });
       cmp.append(w); return rows; };
     const a = col("Tester alone", t.plain), b = col("With consensus", t.consensus);
     for (let i = 0; i < 8; i++) { await sleep(110); if (my !== tok) return; if (a[i]) a[i].classList.remove("pend"); if (b[i]) b[i].classList.remove("pend"); }
@@ -459,7 +469,7 @@ footer { color: var(--dim); font-size: 12.5px; padding-block: 28px 40px; }
   function fillProblems() {
     document.querySelectorAll("#dsSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === S.ds)));
     const sel = $("#probSel"); sel.innerHTML = "";
-    D.problems.forEach((p, i) => { if (S.ds !== "All" && p.dataset !== S.ds) return; const o = el("option", "", `${p.entry}  ·  ${p.dataset}  ·  ${outcome(p)}`); o.value = i; sel.append(o); });
+    D.problems.forEach((p, i) => { if (S.ds !== "All" && p.dataset !== S.ds) return; const o = el("option", "", `${p.entry}  ·  ${p.dataset}  ·  base tester: ${outcome(p)}`); o.value = i; sel.append(o); });
     if (![...sel.options].some((o) => +o.value === S.pid)) S.pid = +sel.options[0].value; sel.value = S.pid; S.test = null; S.call = null; go(S.stage);
   }
   function bootExplore() {
